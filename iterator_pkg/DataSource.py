@@ -1,1 +1,1 @@
-import numpy as npimport h5pyimport os
+import numpy as npimport h5pyimport osclass DataFollower():        def __init__(self):        pass
