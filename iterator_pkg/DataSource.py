@@ -1,1 +1,1 @@
-import numpy as npimport h5pyimport osclass DataFollower():        def __init__(self):        pass
+import numpy as npimport h5pyimport osfrom iterator_pkg import KeyFollowerclass DataFollower():        def __init__(self,                 keypaths):        self.keypaths = keypaths            def start(self):        self.__key_follower_init()                def __key_follower_init(self):        kf = KeyFollower.Follower(self.keypaths)        kf.start()                    
