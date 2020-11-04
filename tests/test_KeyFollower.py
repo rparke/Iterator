@@ -15,8 +15,8 @@ from nexus_iterator import KeyFollower
 def test_iterates_complete_dataset():
           
       filepath = "hdf5_tests/complete_1.h5"
-      #filepath = "hdf5_tests/i18-81742.nxs"
-      key_paths = ["keys/complete"]
+      ##key_paths = ["keys/complete"]
+      key_paths = ["keys"]
       with h5py.File(filepath, "r") as f:
           #data = f[key_paths[0]][...]
 
@@ -34,7 +34,8 @@ def test_iterates_complete_dataset():
 def test_iterates_incomplete_dataset():
     
     filepath = "hdf5_tests/incomplete_1.h5"
-    key_paths = ["incomplete_2814"]
+    #key_paths = ["incomplete_2814"]
+    key_paths = ["/"]
     with h5py.File(filepath, "r") as f:
         kf = KeyFollower.Follower(f, key_paths, timeout = 1)
         current_key = 0
@@ -48,7 +49,8 @@ def test_iterates_incomplete_dataset():
 def test_iterates_multiple_incomplete_dataset():
     
     filepath = "hdf5_tests/multiple_incomplete_1.h5"
-    key_paths = ["data/1000", 'data/2000']
+    #key_paths = ["data/1000", 'data/2000']
+    key_paths = ["data", 'data']
     with h5py.File(filepath, "r") as f:
         kf = KeyFollower.Follower(f, key_paths, timeout = 1)
         current_key = 0

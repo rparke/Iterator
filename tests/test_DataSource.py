@@ -13,7 +13,7 @@ from nexus_iterator import KeyFollower
 def test_iterates_complete_dataset():
           
       filepath = "hdf5_tests/complete_2.h5"
-      key_paths = ["keys/2"]
+      key_paths = ["keys"]
       data_paths = ['data/2']
       with h5py.File(filepath, "r") as f:
            df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
@@ -27,7 +27,7 @@ def test_iterates_complete_dataset():
 def test_iterates_incomplete_dataset():
           
       filepath = "hdf5_tests/incomplete_2.h5"
-      key_paths = ["keys/incomplete"]
+      key_paths = ["keys"]
       data_paths = ["data/incomplete"]
       with h5py.File(filepath, "r") as f:
            df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
@@ -40,7 +40,7 @@ def test_iterates_incomplete_dataset():
 def test_iterates_multiple_incomplete_dataset():
           
       filepath = "hdf5_tests/incomplete_2.h5"
-      key_paths = ["keys/complete", "keys/incomplete"]
+      key_paths = ["keys"]
       data_paths = ['data/full', "data/incomplete"]
       with h5py.File(filepath, "r") as f:
           #data = f[key_paths[0]][...]
@@ -55,7 +55,7 @@ def test_iterates_multiple_incomplete_dataset():
 #Check that the correct dataset is returned ignoring shapes
 def test_correct_return_data_complete():
       filepath = "hdf5_tests/complete_2.h5"
-      key_paths = ["keys/2"]
+      key_paths = ["keys"]
       data_paths = ['data/2']
       with h5py.File(filepath, "r") as f:
            
@@ -68,7 +68,7 @@ def test_correct_return_data_complete():
            
 def test_correct_return_single_data_incomplete():
       filepath = "hdf5_tests/incomplete_2.h5"
-      key_paths = ["keys/incomplete"]
+      key_paths = ["keys"]
       data_paths = ["data/incomplete"]
       with h5py.File(filepath, "r") as f:
            
@@ -84,7 +84,7 @@ def test_correct_return_single_data_incomplete():
 
 def test_correct_return_multiple_data_incomplete():
       filepath = "hdf5_tests/incomplete_2.h5"
-      key_paths = ["keys/complete", "keys/incomplete"]
+      key_paths = ["keys"]
       data_paths = ['data/full', "data/incomplete"]
       with h5py.File(filepath, "r") as f:
            
@@ -101,7 +101,7 @@ def test_correct_return_multiple_data_incomplete():
 
 def test_correct_return_shape():
     filepath = "hdf5_tests/shape_test.h5"
-    key_paths = ["keys/3d", "keys/4d"]
+    key_paths = ["keys"]
     data_paths = ["data/3d", "data/4d"]
     with h5py.File(filepath, "r") as f:
         df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
@@ -110,7 +110,7 @@ def test_correct_return_shape():
             
 def test_reset_method_iterates_correct_length():
     filepath = "hdf5_tests/complete_2.h5"
-    key_paths = ["keys/2"]
+    key_paths = ["keys"]
     data_paths = ['data/2']
     with h5py.File(filepath, "r") as f:
          df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
@@ -125,7 +125,7 @@ def test_reset_method_iterates_correct_length():
 
 def test_reset_method_correct_return():
       filepath = "hdf5_tests/complete_2.h5"
-      key_paths = ["keys/2"]
+      key_paths = ["keys"]
       data_paths = ['data/2']
       with h5py.File(filepath, "r") as f:
            

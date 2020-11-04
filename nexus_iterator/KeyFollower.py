@@ -20,6 +20,17 @@ class Follower():
                      self.current_max = -1
                      self.timeout = timeout
                      self.key_datasets = key_datasets
+                     
+# =============================================================================
+#                      #test code
+#                      self.key_datasets = []
+#                      for grouppath in key_datasets:
+#                          for relativepath in hdf5_file[grouppath].keys():
+#                              self.key_datasets.append(grouppath + "/" + relativepath)
+#                     #end of test
+# =============================================================================
+                     
+                     
                      self.termination_conditions = termination_conditions
 
                          
@@ -54,15 +65,30 @@ class Follower():
         self.start_time = time.time()
                              
      
-    #Returns the maximum readable key            
+# =============================================================================
+#     #Returns the maximum readable key            
+#     def get_current_max(self):
+#         current_max = []
+#         for key_path in self.key_datasets:
+#             dataset = self.hdf5_file[key_path]
+#             print("Refreshing")
+#             dataset.refresh()
+#             current_max.append(np.nonzero(dataset[...].flatten())[0].max())
+#         return np.asarray(current_max).min()
+# =============================================================================
+    
+    
     def get_current_max(self):
         current_max = []
         for key_path in self.key_datasets:
-            dataset = self.hdf5_file[key_path]
-            print("Refreshing")
-            dataset.refresh()
-            current_max.append(np.nonzero(dataset[...].flatten())[0].max())
+            print("Key_Path = {}".format(key_path))
+            print(type(self.hdf5_file[key_path]))
+            for dataset in self.hdf5_file[key_path].values():
+                print("Refreshing")
+                dataset.refresh()
+                current_max.append(np.nonzero(dataset[...].flatten())[0].max())
         return np.asarray(current_max).min()
+        
         
     
     
