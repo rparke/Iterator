@@ -57,7 +57,7 @@ def incomplete_dataset():
 
 
 
-class complete():
+class Complete():
     
     def __init__(self):
         self.complete_dict = self.complete_dict()
@@ -95,7 +95,7 @@ class complete():
         return complete_dict
     
     
-class incomplete():
+class Incomplete():
     def __init__(self):
         self.incomplete_dict = self.incomplete_dict()
     
@@ -113,7 +113,7 @@ class incomplete():
         array_shape = (42,67,10,4096)
         
         #create complete datasets
-        incomplete_array = np.arange(np.asarray(array_shape).prod())
+        incomplete_array = np.arange(1, np.asarray(array_shape).prod()+1)
         incomplete_array[array_shape[-1]*array_shape[-2]*2000:] = 0
         
         incomplete_dict = {"dset_1": incomplete_array}
@@ -121,10 +121,10 @@ class incomplete():
         #dataset_dict = {"data": complete_array}
         return incomplete_dict
     
-    def complete_keys_dataset(self):
+    def incomplete_keys_dataset(self):
         #create complete datasets
-        incomplete_array = np.arange(2814)
-        incomplete_array = incomplete_array[2000:]
+        incomplete_array = np.arange(1, 2814+1)
+        incomplete_array[2000:] = 0
         incomplete_array.reshape((42,67,1,1))
         
         

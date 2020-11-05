@@ -85,7 +85,7 @@ class Follower():
             print(type(self.hdf5_file[key_path]))
             for dataset in self.hdf5_file[key_path].values():
                 print("Refreshing")
-                dataset.refresh()
+                self.hdf5_file.refresh()
                 current_max.append(np.nonzero(dataset[...].flatten())[0].max())
         return np.asarray(current_max).min()
         
