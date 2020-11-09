@@ -3,7 +3,7 @@ import h5py
 import pytest
 import os
 from nexus_iterator import KeyFollower
-import conftest
+from unittest.mock import Mock, patch, MagicMock
 
 
 class Complete():
@@ -21,6 +21,7 @@ class Complete():
     
     def complete_dataset(self):
     
+        #change to smaller array
         array_shape = (42,67,10,4096)
         
         #create complete datasets
@@ -35,12 +36,13 @@ class Complete():
     
     def complete_keys_dataset(self):
         #create complete datasets
-        complete_array = np.arange(2814).reshape((42,67,1,1))
+        self.complete_array = np.arange(2814).reshape((42,67,1,1))
+        self.complete_array.refresh = MagicMock(return_value = None)
         
-        complete_dict = {"key_1":complete_array}
+        self.complete_dict = {"key_1":self.complete_array}
         
         #dataset_dict = {"keys": complete_array}
-        return complete_dict
+        return self.complete_dict
     
     def refresh(self):
         return
@@ -133,6 +135,50 @@ class MultipleIncomplete():
     
     def refresh(self):
         return
+    
+class IncompleteUpdate():
+    def __init__(self):
+        self.incomplete_dict = self.incomplete_dict()
+        self.count = 0
+    
+    def __getitem__(self, key):
+        return self.incomplete_dict[key]
+
+
+    def incomplete_dict(self):
+        incomplete_datasets = {"keys":self.incomplete_keys_dataset(), "data":self.incomplete_dataset()}
+        return incomplete_datasets
+    
+    def incomplete_dataset(self):
+    
+        array_shape = (42,67,10,4096)
+        
+        #create complete datasets
+        self.incomplete_array = np.arange(1, np.asarray(array_shape).prod()+1)
+        self.incomplete_array[array_shape[-1]*array_shape[-2]*2000:] = 0
+        
+        self.incomplete_dict = {"dset_1": self.incomplete_array}
+        
+        #dataset_dict = {"data": complete_array}
+        return self.incomplete_dict
+    
+    def incomplete_keys_dataset(self):
+        #create complete datasets
+        self.incomplete_key_array = np.arange(1, 2814+1)
+        self.incomplete_key_array[2000:] = 0
+        self.incomplete_key_array.reshape((42,67,1,1))
+        
+        
+        self.incomplete_dict = {"key_1":self.incomplete_key_array}
+        
+        #dataset_dict = {"keys": complete_array}
+        return self.incomplete_dict
+    
+    def refresh(self):
+        self.count += 1
+        if self.count == 10:
+            self.incomplete_key_array[2000:2500] = np.arange(2000,2500)
+            self.incomplete_array[2000*40960:2500*40960] = np.arange(2000*40960, 2500*40960)
 
 
 #1
@@ -230,3 +276,11 @@ def test_iterates_multiple_incomplete_dataset():
     for key in kf:
         current_key+=1
     assert current_key == 2000
+
+
+
+
+
+
+    
+
