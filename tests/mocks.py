@@ -317,3 +317,82 @@ class IncompleteUpdating():
             
         return
     
+
+    
+#Finish This
+class IncompleteSnakeScan():
+    
+    def __init__(self, update_count = 10):
+        self.complete_dict = self.complete_dict()
+        self.count = -1
+        self.update_count = update_count
+    
+    def __getitem__(self, key):
+        return self.complete_dict[key]
+
+
+    def complete_dict(self):
+        complete_datasets = {"keys":self._key_dict(), "data":self._dataset_dict()}
+        return complete_datasets
+    
+    def _dataset_dict(self):
+        return {"dset_1":self._incomplete_dataset()}
+    
+    def _key_dict(self):
+        return {"key_1": self._incomplete_keys_dataset()}
+    
+
+    def _incomplete_dataset(self):
+    
+        #change to smaller array
+        array_shape = (42,67,10,4096)
+        
+        #create complete datasets
+        complete_array = np.arange(np.asarray(array_shape).prod()).reshape(array_shape)
+        
+        #Subclass the np.ndarray so that the Complete.refresh method can be called
+        self.incomplete_dataset = DataSet(complete_array.shape)
+        self.incomplete_dataset[:] = complete_array[:]
+        self.incomplete_dataset.refresh = self.refresh
+        
+        return self.incomplete_dataset
+    
+
+    
+    def _incomplete_keys_dataset(self):
+        #Create set of sequential keys 2000 long
+        
+        #Create Arays
+        complete_array = np.arange(2814).reshape((42,67,1,1))+1
+        self.final_array = complete_array.copy()
+        
+        #Edit the array so the final line is following the pattern of a snake scan
+        complete_array[-1][:-3] = [[0]]
+        
+        self.incomplete_key_dataset = DataSet(complete_array.shape)
+        self.incomplete_key_dataset[:] = complete_array[:]
+        self.incomplete_key_dataset.refresh = self.refresh
+        
+
+        return self.incomplete_key_dataset
+    
+    def refresh(self):
+        self.count+=1
+        if self.count == self.update_count:
+            print("Updating the dataset")
+            
+            self.incomplete_key_dataset[:] = self.final_array[:]
+            
+
+            
+        
+        else:
+            print("Doing Nothing")
+
+            
+        return
+
+
+
+
+    
