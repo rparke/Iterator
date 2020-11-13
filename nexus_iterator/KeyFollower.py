@@ -39,6 +39,7 @@ class Follower():
         return(self)
     
     def __next__(self):
+        
         if not self.is_finished():
             
             while not self._is_next():
@@ -81,11 +82,9 @@ class Follower():
     def get_current_max(self):
         current_max = []
         for key_path in self.key_datasets:
-            print("Key_Path = {}".format(key_path))
-            print(type(self.hdf5_file[key_path]))
             for dataset in self.hdf5_file[key_path].values():
-                print("Refreshing")
-                self.hdf5_file.refresh()
+                dataset.refresh()
+                #self.hdf5_file.refresh()
                 current_max.append(np.nonzero(dataset[...].flatten())[0].max())
         return np.asarray(current_max).min()
         
@@ -99,9 +98,8 @@ class Follower():
         #assign current max to a variable and only call the function current_max when needed
         
         if self.current_key == self.current_max:
-            print("self.current_key: {}, self.current_max: {}".format(self.current_key, self.current_max))
             self.current_max = self.get_current_max()
-            print("self.current_max: {}".format(self.current_max))
+
         
         if self.current_key < self.current_max:
             return True
