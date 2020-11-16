@@ -54,19 +54,7 @@ class Follower():
         self.start_time = time.time()
                              
      
-       
-# =============================================================================
-#     def get_current_max(self):
-#          current_max = []
-#          for key_path in self.key_datasets:
-#              dataset = self.hdf5_file[key_path]
-#              print("Refreshing")
-#              dataset.refresh()
-#              current_max.append(np.nonzero(dataset[...].flatten())[0].max())
-#          return np.asarray(current_max).min()
-# =============================================================================
-
-    
+        
 
     def get_current_max(self):
          current_max = []
@@ -82,41 +70,38 @@ class Follower():
 
 # =============================================================================
 #     def _is_next(self):
-#         
-#         #assign current max to a variable and only call the function current_max when needed
-#         
-#         next_key = self.current_key + 1
-#         
-#         next_list = []
-#         
-#         for key_path in self.key_datasets:
-#             for dataset in self.hdf5_file[key_path].values():
-#                 dataset.refresh()
-#                 next_list.append(dataset.flatten()[next_key])
-#             
-#         next_array = np.asarray(next_list)
-#         if (next_array == 0).any():
-#             return False
-#         else:
-#             return True
-#                 
+#          
+#          #assign current max to a variable and only call the function current_max when needed
+#          
+#          if self.current_key == self.current_max:
+#              self.current_max = self.get_current_max()
+#  
+#          
+#          if self.current_key < self.current_max:
+#              return True
+#          else:
+#              return False
 # =============================================================================
-        
-    
-
-    def _is_next(self):
-         
-         #assign current max to a variable and only call the function current_max when needed
-         
-         if self.current_key == self.current_max:
-             self.current_max = self.get_current_max()
- 
-         
-         if self.current_key < self.current_max:
-             return True
-         else:
-             return False
       
+    def _is_next(self):
+        
+        
+        is_next = True
+        
+        for key_path in self.key_datasets:
+            for dataset in self.hdf5_file[key_path].values():
+                dataset.refresh()
+                #print(dataset.flatten()[self.current_key+1])
+                
+                try:
+                    if dataset.flatten()[self.current_key+1] == 0:
+                        is_next = False
+                    else:
+                        pass
+                except:
+                    is_next = False
+        return is_next
+                
         
     def _timeout(self):
         if time.time() > self.start_time + self.timeout:
