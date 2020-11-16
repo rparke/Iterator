@@ -44,7 +44,10 @@ incomplete_snake_scan_array[3:] = 0
 incomplete_snake_scan_array[2][:-3] = 0
 incomplete_snake_scan_dataset = create_dataset_from_numpy_array(incomplete_snake_scan_array)
 
-
+#Create a small incomplete dataset that will be updated to the full size
+small_incomplete_array = np.arange(25)+1
+small_incomplete_array = small_incomplete_array.reshape(5,5,1,1)
+small_incomplete_dataset = create_dataset_from_numpy_array(small_incomplete_array)
 
 
 
@@ -135,5 +138,20 @@ def test_reads_updates():
     for key in kf:
         current_key += 1
         
+    assert current_key == 50
+    
+def test_update_changes_shape():
+    key_paths = ["keys"]
+    h5py.File = MagicMock()
+    h5py.File.return_value = {"keys":{"small_incomplete":small_incomplete_dataset}}
+    f = h5py.File("filepath")
+    kf =KeyFollower.Follower(f, key_paths, timeout = 0.1)
+    current_key = 0
+    for i in range(5):
+        next(kf)
+        current_key+=1
+    kf.hdf5_file = {"keys":{"small_incomplete":complete_dataset}}
+    for key in kf:
+        current_key+=1
     assert current_key == 50
     

@@ -5,13 +5,44 @@ import pytest
 import os
 from nexus_iterator import DataSource
 from nexus_iterator import KeyFollower
+from unittest.mock import MagicMock, Mock, patch
+
+
+#Creating datasets from numpy arrays
+class DataSet(np.ndarray):pass
+
+def create_dataset_from_numpy_array(numpy_array):
+    ds = DataSet(numpy_array.shape)
+    ds[:] = numpy_array[:]
+    ds.refresh = lambda:None
+    return ds
+
+#Create a dataset of keys that is completely filled with non-zero values
+#Number of iterations = 50
+complete_dataset_data = create_dataset_from_numpy_array(np.arange(50*10).reshape(5,10,1,10))
+complete_dataset_keys = create_dataset_from_numpy_array(np.arange(50).reshape(5,10,1,1)+1)
 
 
 
 
-#Check correct number of iterations are completed
+
+
 def test_iterates_complete_dataset():
-          
+      key_paths = ["keys"]
+      
+      h5py.File = MagicMock()
+      h5py.File.return_value = {"keys": {'complete':complete_dataset_keys}, "data": {"complete": complete_dataset_data}}
+      
+      data_paths = ['data']
+      key_paths = ['keys']
+      f = h5py.File()
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      current_key = 0
+      for dset in df:
+        current_key+= 1
+      assert current_key == 50
+
+def test_iterates_complete_dataset():
       filepath = "hdf5_tests/complete_2.h5"
       key_paths = ["keys"]
       data_paths = ['data/2']

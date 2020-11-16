@@ -67,21 +67,6 @@ class Follower():
          
 
 
-
-# =============================================================================
-#     def _is_next(self):
-#          
-#          #assign current max to a variable and only call the function current_max when needed
-#          
-#          if self.current_key == self.current_max:
-#              self.current_max = self.get_current_max()
-#  
-#          
-#          if self.current_key < self.current_max:
-#              return True
-#          else:
-#              return False
-# =============================================================================
       
     def _is_next(self):
         

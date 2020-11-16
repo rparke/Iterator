@@ -63,8 +63,9 @@ class DataFollower(KeyFollower.Follower):
     #Creates a list of frame shapes       
     def _get_frame_size(self):
         frame_size = []
-        for dataset in self.data_datasets:
-            frame_size.append((self.hdf5_file[dataset].shape)[-2] * (self.hdf5_file[dataset].shape)[-1])
+        for datapath in self.data_datasets:
+            for dataset in self.hdf5_file[datapath].values():
+                frame_size.append((dataset.shape)[-2] * (dataset.shape)[-1])
         self.frame_size = np.asarray(frame_size)
         
         self._get_frame_shape()
