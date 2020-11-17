@@ -37,6 +37,7 @@ class DataFollower():
             
             current_dataset_index = next(self.kf)
             current_dataset_slice = self._get_dataset_flattened(current_dataset_index)
+    
             
             return current_dataset_slice
         
@@ -49,11 +50,13 @@ class DataFollower():
     def _get_dataset_flattened(self, current_dataset_index):
         return_list = []
         slice_shape_generator = self._get_slice_shape()
+        restore_shape = self._restore_dataset_shape()
         for group in self.dataset_paths:
             for dataset in self.hdf5_file[group].values():
                 dataset_shape = next(slice_shape_generator)
-                return_list.append(dataset.flatten()[current_dataset_index*dataset_shape: (current_dataset_index + 1)*dataset_shape])
+                return_list.append(  (dataset.flatten()[current_dataset_index*dataset_shape: (current_dataset_index + 1)*dataset_shape]).reshape(next(restore_shape))  )
         return return_list
+    
         
         
     def _get_slice_shape(self):
@@ -63,36 +66,17 @@ class DataFollower():
                 
                 
     def _restore_dataset_shape(self):
-        pass
+        for group in self.dataset_paths:
+            for dataset in self.hdf5_file[group].values():
+                full_shape = list(dataset.shape)
+                length = len(full_shape)
+                for i in range(length -2):
+                    full_shape[i] = 1
+                yield full_shape
+                
+                
         
             
             
 
 
-
-
-
-
-# =============================================================================
-# from unittest.mock import MagicMock
-# 
-# #Creating datasets from numpy arrays
-# class DataSet(np.ndarray):pass
-# 
-# def create_dataset_from_numpy_array(numpy_array):
-#     ds = DataSet(numpy_array.shape)
-#     ds[:] = numpy_array[:]
-#     ds.refresh = lambda:None
-#     return ds
-# 
-# #Create a dataset of keys that is completely filled with non-zero values
-# #Number of iterations = 50
-# complete_dataset = create_dataset_from_numpy_array(np.arange(50).reshape(5,10,1,1)+1)
-# 
-# 
-# key_paths = ["keys"]
-# h5py.File = MagicMock()
-# h5py.File.return_value = {'keys':{"complete":complete_dataset}}
-# f = h5py.File("filepath")
-# df = DataFollower(f, key_paths, timeout = 0.1)
-# =============================================================================

@@ -23,13 +23,29 @@ complete_dataset_data = create_dataset_from_numpy_array(np.arange(50*10).reshape
 complete_dataset_keys = create_dataset_from_numpy_array(np.arange(50).reshape(5,10,1,1)+1)
 
 #Number of iterations = 40
-incomplete_dataset_data = complete_dataset_data[:]
+incomplete_dataset_data = complete_dataset_data.copy()
+incomplete_dataset_data[-1] = 0
 incomplete_dataset_data = create_dataset_from_numpy_array(incomplete_dataset_data)
-incomplete_dataset_keys = complete_dataset_keys[:]
-incomplete_dataset_keys = incomplete_dataset_keys.flatten()
-incomplete_dataset_keys[-10:] = 0
+incomplete_dataset_keys = complete_dataset_keys.copy()
+incomplete_dataset_keys[-1] = 0
 incomplete_dataset_keys = incomplete_dataset_keys.reshape(complete_dataset_keys.shape)
 incomplete_dataset_keys = create_dataset_from_numpy_array(incomplete_dataset_keys)
+
+
+four_dimensional_dataset_data = complete_dataset_data.copy()
+four_dimensional_dataset_data = create_dataset_from_numpy_array(four_dimensional_dataset_data)
+
+four_dimensional_dataset_keys = complete_dataset_keys.copy()
+four_dimensional_dataset_keys = create_dataset_from_numpy_array(four_dimensional_dataset_keys)
+
+
+three_dimensional_dataset_data = complete_dataset_data.copy()
+three_dimensional_dataset_data = three_dimensional_dataset_data.reshape(50,1,10)
+three_dimensional_dataset_data = create_dataset_from_numpy_array(three_dimensional_dataset_data)
+
+three_dimensional_dataset_keys = complete_dataset_keys.copy()
+three_dimensional_dataset_keys = three_dimensional_dataset_keys.reshape(50,1,1)
+three_dimensional_dataset_keys = create_dataset_from_numpy_array(three_dimensional_dataset_keys)
 
 
 
@@ -84,6 +100,8 @@ def test_iterates_multiple_incomplete_dataset():
       for dset in df:
         current_key+= 1
       assert current_key == 40
+      
+
 
 
 
@@ -95,96 +113,52 @@ def test_correct_return_data_complete():
                                 "data": {"complete": complete_dataset_data}}
       data_paths = ['data']
       key_paths = ['keys']
-
+      f = h5py.File()
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      full_dataset = np.array([])
+      for dset in df:
+          full_dataset = np.concatenate((full_dataset, dset[0].flatten()))
+      assert(complete_dataset_data.flatten() == full_dataset.flatten()).all()
       
 
-#Check that the correct dataset is returned ignoring shapes
-def test_correct_return_data_complete():
-      filepath = "hdf5_tests/complete_2.h5"
-      key_paths = ["keys"]
-      data_paths = ['data/2']
-      with h5py.File(filepath, "r") as f:
-           
-           df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
-           full_dataset = np.array([])
-           for dset in df:
-               full_dataset = np.concatenate((full_dataset, dset[0].flatten()))
-           assert((f[data_paths[0]][...].flatten() == full_dataset).all())
-           
-           
-def test_correct_return_single_data_incomplete():
-      filepath = "hdf5_tests/incomplete_2.h5"
-      key_paths = ["keys"]
-      data_paths = ["data/incomplete"]
-      with h5py.File(filepath, "r") as f:
-           
-           df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
-           full_dataset = np.array([])
-           for dset in df:
-               full_dataset = np.concatenate((full_dataset, dset[0].flatten()))
-        
-           assert((f[data_paths[0]][...].flatten()[:len(full_dataset)] == full_dataset).all())
-           #return [[full_dataset], [f[data_paths[0]][...].flatten()]]
-        
 
-
-def test_correct_return_multiple_data_incomplete():
-      filepath = "hdf5_tests/incomplete_2.h5"
-      key_paths = ["keys"]
-      data_paths = ['data/full', "data/incomplete"]
-      with h5py.File(filepath, "r") as f:
-           
-           df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
-           full_dataset = np.array([])
-           for dset in df:
-               full_dataset = np.concatenate((full_dataset, dset[0].flatten()))
-        
-           assert((f[data_paths[0]][...].flatten()[:len(full_dataset)] == full_dataset).all())
-           
 
 #Test correct shapes are returned
 
 
 def test_correct_return_shape():
-    filepath = "hdf5_tests/shape_test.h5"
-    key_paths = ["keys"]
-    data_paths = ["data/3d", "data/4d"]
-    with h5py.File(filepath, "r") as f:
-        df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
-        for dset in df:
-            assert dset[0].shape == (1,10,4096) and dset[1].shape == (1,1,10,4096)
+    h5py.File = MagicMock()
+    h5py.File.return_value = {"keys":{"four_dimensional": four_dimensional_dataset_keys,
+                                      "three_dimensional": three_dimensional_dataset_keys},
+                              "data":{"four_dimensional": four_dimensional_dataset_data,
+                                      "three_dimensional": three_dimensional_dataset_data}}
+    
+    data_paths = ['data']
+    key_paths = ['keys']
+    f = h5py.File()
+    df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+    for dset in df:
+        assert dset[0].shape == (1,1,1,10) and dset[1].shape == (1,1,10)
+
+
             
 def test_reset_method_iterates_correct_length():
-    filepath = "hdf5_tests/complete_2.h5"
-    key_paths = ["keys"]
-    data_paths = ['data/2']
-    with h5py.File(filepath, "r") as f:
-         df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
-         current_key = 0
-         for dset in df:
-             current_key+= 1
-         df.reset()
-         for dset in df:
-             current_key+= 1
-    assert current_key == 20
+      h5py.File = MagicMock()
+      h5py.File.return_value = {"keys": {'complete':complete_dataset_keys}, "data": {"complete": complete_dataset_data}}
+      
+      data_paths = ['data']
+      key_paths = ['keys']
+      f = h5py.File()
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      current_key = 0
+      for dset in df:
+        current_key+= 1
+        
+      df.reset()
+      for dset in df:
+        current_key+= 1
+      assert current_key == 100
     
 
-def test_reset_method_correct_return():
-      filepath = "hdf5_tests/complete_2.h5"
-      key_paths = ["keys"]
-      data_paths = ['data/2']
-      with h5py.File(filepath, "r") as f:
-           
-           df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
-           full_dataset = np.array([])
-           for dset in df:
-               full_dataset = np.concatenate((full_dataset, dset[0].flatten()))
-           df.reset()
-           for dset in df:
-               full_dataset = np.concatenate((full_dataset, dset[0].flatten()))
-           
-           full_dataset_test = (f[data_paths[0]][...].flatten())
-           full_dataset_test = np.concatenate([full_dataset_test, full_dataset_test])
-           
-           assert( ( full_dataset_test == full_dataset).all())
+
 
