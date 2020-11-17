@@ -22,13 +22,22 @@ def create_dataset_from_numpy_array(numpy_array):
 complete_dataset_data = create_dataset_from_numpy_array(np.arange(50*10).reshape(5,10,1,10))
 complete_dataset_keys = create_dataset_from_numpy_array(np.arange(50).reshape(5,10,1,1)+1)
 
+#Number of iterations = 40
+incomplete_dataset_data = complete_dataset_data[:]
+incomplete_dataset_data = create_dataset_from_numpy_array(incomplete_dataset_data)
+incomplete_dataset_keys = complete_dataset_keys[:]
+incomplete_dataset_keys = incomplete_dataset_keys.flatten()
+incomplete_dataset_keys[-10:] = 0
+incomplete_dataset_keys = incomplete_dataset_keys.reshape(complete_dataset_keys.shape)
+incomplete_dataset_keys = create_dataset_from_numpy_array(incomplete_dataset_keys)
+
 
 
 
 
 
 def test_iterates_complete_dataset():
-      key_paths = ["keys"]
+
       
       h5py.File = MagicMock()
       h5py.File.return_value = {"keys": {'complete':complete_dataset_keys}, "data": {"complete": complete_dataset_data}}
@@ -41,46 +50,52 @@ def test_iterates_complete_dataset():
       for dset in df:
         current_key+= 1
       assert current_key == 50
-
-def test_iterates_complete_dataset():
-      filepath = "hdf5_tests/complete_2.h5"
-      key_paths = ["keys"]
-      data_paths = ['data/2']
-      with h5py.File(filepath, "r") as f:
-           df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
-           current_key = 0
-           for dset in df:
-               current_key+= 1
-      assert current_key == 10
-
-    
-    
+      
 def test_iterates_incomplete_dataset():
-          
-      filepath = "hdf5_tests/incomplete_2.h5"
-      key_paths = ["keys"]
-      data_paths = ["data/incomplete"]
-      with h5py.File(filepath, "r") as f:
-           df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
-           current_key = 0
-           for dset in df:
-               current_key+= 1
-      assert current_key == 2
 
       
+      h5py.File = MagicMock()
+      h5py.File.return_value = {"keys": {'incomplete':incomplete_dataset_keys}, "data": {"incomplete": incomplete_dataset_data}}
+      
+      data_paths = ['data']
+      key_paths = ['keys']
+      f = h5py.File()
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      current_key = 0
+      for dset in df:
+        current_key+= 1
+      assert current_key == 40
+      
+      
 def test_iterates_multiple_incomplete_dataset():
-          
-      filepath = "hdf5_tests/incomplete_2.h5"
-      key_paths = ["keys"]
-      data_paths = ['data/full', "data/incomplete"]
-      with h5py.File(filepath, "r") as f:
-          #data = f[key_paths[0]][...]
 
-           df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
-           current_key = 0
-           for dset in df:
-               current_key+= 1
-      assert current_key == 2
+      
+      h5py.File = MagicMock()
+      h5py.File.return_value = {"keys": {'complete':complete_dataset_keys,
+                                         'incomplete':incomplete_dataset_keys}, 
+                                "data": {"complete": complete_dataset_data,
+                                    "incomplete": incomplete_dataset_data}}
+      
+      data_paths = ['data']
+      key_paths = ['keys']
+      f = h5py.File()
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      current_key = 0
+      for dset in df:
+        current_key+= 1
+      assert current_key == 40
+
+
+
+
+#Check that the correct dataset is returned ignoring shapes
+def test_correct_return_data_complete():
+      h5py.File = MagicMock()
+      h5py.File.return_value = {"keys": {'complete':complete_dataset_keys}, 
+                                "data": {"complete": complete_dataset_data}}
+      data_paths = ['data']
+      key_paths = ['keys']
+
       
 
 #Check that the correct dataset is returned ignoring shapes
