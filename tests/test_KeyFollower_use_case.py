@@ -15,9 +15,7 @@ def test_iterates_complete_dataset():
           
 
     key_paths = ["keys"]
-    h5py.File = MagicMock()
-    h5py.File.return_value = {'keys':{"complete":Dataset.complete_dataset()}}
-    f = h5py.File("filepath")
+    f = {'keys':{"complete":Dataset.complete_dataset()}}
     kf = KeyFollower.Follower(f, key_paths, timeout = 0.1)
     current_key = 0
     for key in kf:
@@ -29,9 +27,7 @@ def test_iterates_complete_dataset():
 def test_iterates_incomplete_dataset():
     
     key_paths = ["keys"]
-    h5py.File = MagicMock()
-    h5py.File.return_value = {"keys":{"incomplete": Dataset.incomplete_dataset()}}
-    f = h5py.File("filepath")
+    f = {"keys":{"incomplete": Dataset.incomplete_dataset()}}
     kf = KeyFollower.Follower(f, key_paths, timeout = 0.1)
     current_key = 0
     for key in kf:
@@ -43,10 +39,8 @@ def test_iterates_incomplete_dataset():
 def test_iterates_multiple_incomplete_dataset():
     
     key_paths = ["keys"]
-    h5py.File = MagicMock()
-    h5py.File.return_value = {"keys":{"complete": Dataset.complete_dataset(), 
+    f = {"keys":{"complete": Dataset.complete_dataset(), 
                                       "incomplete": Dataset.incomplete_dataset()}}
-    f = h5py.File("filepath")
     kf = KeyFollower.Follower(f, key_paths, timeout = 0.1)
     current_key = 0
     for key in kf:
@@ -57,11 +51,7 @@ def test_iterates_multiple_incomplete_dataset():
 
 def test_iterates_row_by_row():
      key_paths = ['keys']
-     h5py.File = MagicMock()
-     h5py.File.return_value = {"keys":{"incomplete_row_by_row": Dataset.incomplete_row_by_row_dataset()}}
-     
-     f = h5py.File("filepath")
-     
+     f = {"keys":{"incomplete_row_by_row": Dataset.incomplete_row_by_row_dataset()}}
      kf = KeyFollower.Follower(f, key_paths, timeout = 0.1)
      current_key = 0
      for key in kf:
@@ -70,11 +60,7 @@ def test_iterates_row_by_row():
 
 def test_iterates_snake_scan():
      key_paths = ['keys']
-     h5py.File = MagicMock()
-     h5py.File.return_value = {"keys":{"incomplete_snake_scan": Dataset.incomplete_snake_scan_dataset()}}
-     
-     f = h5py.File("filepath")
-     
+     f = {"keys":{"incomplete_snake_scan": Dataset.incomplete_snake_scan_dataset()}}  
      kf = KeyFollower.Follower(f, key_paths, timeout = 0.1)
      current_key = 0
      for key in kf:
@@ -84,9 +70,7 @@ def test_iterates_snake_scan():
 
 def test_reads_updates():
     key_paths = ["keys"]
-    h5py.File = MagicMock()
-    h5py.File.return_value = {"keys":{"incomplete": Dataset.incomplete_dataset()}}
-    f = h5py.File("filepath")
+    f = {"keys":{"incomplete": Dataset.incomplete_dataset()}}
     kf = KeyFollower.Follower(f, key_paths, timeout = 0.1)
     current_key = 0
     for i in range(5):
@@ -101,9 +85,7 @@ def test_reads_updates():
     
 def test_update_changes_shape():
     key_paths = ["keys"]
-    h5py.File = MagicMock()
-    h5py.File.return_value = {"keys":{"small_incomplete": Dataset.small_incomplete_dataset()}}
-    f = h5py.File("filepath")
+    f = {"keys":{"small_incomplete": Dataset.small_incomplete_dataset()}}
     kf =KeyFollower.Follower(f, key_paths, timeout = 0.1)
     current_key = 0
     for i in range(5):
@@ -113,4 +95,9 @@ def test_update_changes_shape():
     for key in kf:
         current_key+=1
     assert current_key == 50
+    
+    
+def test_finish_flag():
+    key_paths = ["keys"]
+    f = {"keys":{"complete": Dataset.complete_dataset()}, "finish_tag": True}
     

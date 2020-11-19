@@ -10,13 +10,8 @@ class DataFollower():
     
     def __init__(self, hdf5_file, keypaths, dataset_paths, timeout = 1):
         self.hdf5_file = hdf5_file
-        self.keypaths = keypaths
-        self.timeout = timeout
         self.dataset_paths = dataset_paths
-        
-
-        
-        self.kf = KeyFollower.Follower(self.hdf5_file, self.keypaths, self.timeout)
+        self.kf = KeyFollower.Follower(hdf5_file, keypaths, timeout)
         
             
         
@@ -26,8 +21,6 @@ class DataFollower():
     
     def __next__(self):
         
-        #Fix for now to ensure we have correctly initialised the dataframe shape
-        #self._get_frame_shape()
             
 
         if self.kf.is_finished():

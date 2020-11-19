@@ -18,7 +18,7 @@ def test_iterates_complete_dataset():
       
       data_paths = ['data']
       key_paths = ['keys']
-      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       current_key = 0
       for dset in df:
         current_key+= 1
@@ -33,7 +33,7 @@ def test_iterates_incomplete_dataset():
       
       data_paths = ['data']
       key_paths = ['keys']
-      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       current_key = 0
       for dset in df:
         current_key+= 1
@@ -50,7 +50,7 @@ def test_iterates_multiple_incomplete_dataset():
       
       data_paths = ['data']
       key_paths = ['keys']
-      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       current_key = 0
       for dset in df:
         current_key+= 1
@@ -67,7 +67,7 @@ def test_correct_return_data_complete():
                                 "data": {"complete": Dataset.complete_dataset_data()}}
       data_paths = ['data']
       key_paths = ['keys']
-      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       full_dataset = np.array([])
       for dset in df:
           full_dataset = np.concatenate((full_dataset, dset[0].flatten()))
@@ -87,7 +87,7 @@ def test_correct_return_shape():
     
     data_paths = ['data']
     key_paths = ['keys']
-    df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+    df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
     for dset in df:
         assert dset[0].shape == (1,1,1,10) and dset[1].shape == (1,1,10)
 
@@ -99,7 +99,7 @@ def test_reset_method_iterates_correct_length():
       
       data_paths = ['data']
       key_paths = ['keys']
-      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 1)
+      df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       current_key = 0
       for dset in df:
         current_key+= 1
