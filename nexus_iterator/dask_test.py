@@ -17,14 +17,14 @@ from dask.distributed import Client
 import time
 import h5py
 from threading import Thread
+from queue import Queue
 
 
-data = ['entry/Xspress3A/data']
-keys = ['entry/solstice_scan/keys']
+
          
 
 #client = Client()
-client_list = []
+result_list = []
 
 
 
@@ -34,21 +34,40 @@ def inc(x):
     return x.sum(axis = 3)
 
 
-def iterate_through_datasource(data, keys):
+def iterate_through_datasource(queue):
     with h5py.File("/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs", "r") as f:
         
-        
+        data = ['entry/Xspress3A/data']
+        keys = ['entry/solstice_scan/keys']
         df = DataFollower(f, keys, data, timeout = 1)
-        for data in df:
-            client_list.append(data)
-            #client_list.append(client.submit(inc, data[0]))
+        for data in range(20):
+            queue.put(next(df))
+        queue.put(None)
 
 
+def read_client_list(queue):
+    client = Client()
+    while True:
+        frame = queue.get()
+        
+        if frame:
+            frame = frame[0]
+            result_list.append(frame.sum(axis = 3))
+            
+        else:
+            queue.task_done()
+            break
     
-    
-thread = Thread(target=(iterate_through_datasource), args = (data, keys))
-thread.start()
-thread.join()
+
+
+
+queue = Queue(maxsize = 10)    
+write_thread = Thread(target=(iterate_through_datasource), args = (queue,))
+read_thread = Thread(target = (read_client_list), args = (queue,))
+write_thread.start()
+read_thread.start()
+write_thread.join()
+read_thread.join()
 
 
 
