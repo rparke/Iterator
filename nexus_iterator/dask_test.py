@@ -23,7 +23,7 @@ data = ['entry/Xspress3A/data']
 keys = ['entry/solstice_scan/keys']
          
 
-client = Client()
+#client = Client()
 client_list = []
 
 
@@ -33,48 +33,25 @@ client_list = []
 def inc(x):
     return x.sum(axis = 3)
 
-with h5py.File("/home/eja26438/Documents/First_Year_Projects/Unique_Keys/Iterator_Data/Data/i18-81742.nxs", "r") as f:
-    df = DataFollower(f, keys, data, timeout = 1)
-    for data in df:
-        client_list.append(client.submit(inc, data[0]))
+
+def iterate_through_datasource(data, keys):
+    with h5py.File("/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs", "r") as f:
+        
+        
+        df = DataFollower(f, keys, data, timeout = 1)
+        for data in df:
+            client_list.append(data)
+            #client_list.append(client.submit(inc, data[0]))
 
 
-result_list = []
-
-for i in client_list:
-    result_list.append(i.result())
     
     
-    
-#Demonstration
-
-
-def inc(x):
-    time.sleep(10)
-    return x+1
+thread = Thread(target=(iterate_through_datasource), args = (data, keys))
+thread.start()
+thread.join()
 
 
 
 
-start_time = time.time()
-future_list = []
-client = Client()
-for i in range(10):
-    future_list.append(client.submit(inc, i))
-    
-print(future_list)
-    
-result_list = []
-for i in future_list:
-    result_list.append(i.result())
-futures_time = time.time() - start_time
-    
-
-start_time = time.time()
-future_list = []
-client = Client()
-for i in range(10):
-    future_list.append(inc(i))
-non_future_time = time.time() - start_time
 
 
