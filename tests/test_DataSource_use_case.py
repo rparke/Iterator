@@ -14,9 +14,9 @@ def test_iterates_complete_dataset():
 
       
       f = {"keys": {'complete':Dataset.complete_dataset_keys()}, 
-                                "data": {"complete": Dataset.complete_dataset_data()}}
+                                "data/complete": Dataset.complete_dataset_data()}
       
-      data_paths = ['data']
+      data_paths = ['data/complete']
       key_paths = ['keys']
       df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       current_key = 0
@@ -29,9 +29,9 @@ def test_iterates_incomplete_dataset():
       
 
       f = {"keys": {'incomplete':Dataset.incomplete_dataset_keys()}, 
-           "data": {"incomplete": Dataset.incomplete_dataset_data()}}
+           "data/incomplete" : Dataset.incomplete_dataset_data()}
       
-      data_paths = ['data']
+      data_paths = ['data/incomplete']
       key_paths = ['keys']
       df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       current_key = 0
@@ -45,10 +45,10 @@ def test_iterates_multiple_incomplete_dataset():
       
       f = {"keys": {'complete':Dataset.complete_dataset_keys(),
                                          'incomplete':Dataset.incomplete_dataset_keys()}, 
-                                "data": {"complete": Dataset.complete_dataset_data(),
-                                    "incomplete": Dataset.incomplete_dataset_data()}}
+                                "data/complete": Dataset.complete_dataset_data(),
+                                    "data/incomplete": Dataset.incomplete_dataset_data()}
       
-      data_paths = ['data']
+      data_paths = ['data/complete', "data/incomplete"]
       key_paths = ['keys']
       df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       current_key = 0
@@ -64,8 +64,8 @@ def test_iterates_multiple_incomplete_dataset():
 #Check that the correct dataset is returned ignoring shapes
 def test_correct_return_data_complete():
       f = {"keys": {'complete':Dataset.complete_dataset_keys()}, 
-                                "data": {"complete": Dataset.complete_dataset_data()}}
-      data_paths = ['data']
+                                "data/complete": Dataset.complete_dataset_data()}
+      data_paths = ['data/complete']
       key_paths = ['keys']
       df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       full_dataset = np.array([])
@@ -82,10 +82,10 @@ def test_correct_return_data_complete():
 def test_correct_return_shape():
     f = {"keys":{"four_dimensional": Dataset.four_dimensional_dataset_keys(),
                                       "three_dimensional": Dataset.three_dimensional_dataset_keys()},
-                              "data":{"four_dimensional": Dataset.four_dimensional_dataset_data(),
-                                      "three_dimensional": Dataset.three_dimensional_dataset_data()}}
+                              "data/four_dimensional": Dataset.four_dimensional_dataset_data(),
+                                      "data/three_dimensional": Dataset.three_dimensional_dataset_data()}
     
-    data_paths = ['data']
+    data_paths = ['data/four_dimensional', "data/three_dimensional"]
     key_paths = ['keys']
     df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
     for dset in df:
@@ -95,9 +95,9 @@ def test_correct_return_shape():
             
 def test_reset_method_iterates_correct_length():
       f = {"keys": {'complete':Dataset.complete_dataset_keys()}, 
-           "data": {"complete": Dataset.complete_dataset_data()}}
+           "data/complete": Dataset.complete_dataset_data()}
       
-      data_paths = ['data']
+      data_paths = ['data/complete']
       key_paths = ['keys']
       df = DataSource.DataFollower(f, key_paths, data_paths, timeout = 0.1)
       current_key = 0

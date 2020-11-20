@@ -37,10 +37,37 @@ class DataFollower():
         
     def reset(self):
         self.kf.reset()
+        
+        
+    def _get_dataset_flattened(self, current_dataset_index):
+        return_list = []
+        for dataset_path in self.dataset_paths:
+            dataset = self.hdf5_file[dataset_path]
+            dataset.refresh()
+            dataset = dataset[...]
+            dataset_shape = self._get_slice_shape(dataset)
+            restore_shape = self._restore_dataset_shape(dataset)
+            return_list.append(  (dataset.flatten()[current_dataset_index*dataset_shape: (current_dataset_index + 1)*dataset_shape]).reshape(restore_shape)  )
+        return return_list
+    
+        
+        
+    def _get_slice_shape(self, dataset):
+            return (dataset.shape[-1]*dataset.shape[-2])
+                
+                
+    def _restore_dataset_shape(self, dataset):
+        for dataset_path in self.dataset_paths:
+            
+            full_shape = list(dataset.shape)
+            length = len(full_shape)
+            for i in range(length -2):
+                full_shape[i] = 1
+            return full_shape
             
             
     
-    def _get_dataset_flattened(self, current_dataset_index):
+    def _get_dataset_flattened_group(self, current_dataset_index):
         return_list = []
         slice_shape_generator = self._get_slice_shape()
         restore_shape = self._restore_dataset_shape()
@@ -52,13 +79,13 @@ class DataFollower():
     
         
         
-    def _get_slice_shape(self):
+    def _get_slice_shape_group(self):
         for group in self.dataset_paths:
             for dataset in self.hdf5_file[group].values():
                 yield (dataset.shape[-1]*dataset.shape[-2])
                 
                 
-    def _restore_dataset_shape(self):
+    def _restore_dataset_shape_group(self):
         for group in self.dataset_paths:
             for dataset in self.hdf5_file[group].values():
                 full_shape = list(dataset.shape)
