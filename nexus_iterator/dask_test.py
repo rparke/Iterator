@@ -46,6 +46,13 @@ def iterate_through_datasource(queue):
         for data in range(20):
             queue.put(next(df))
         queue.put(None)
+        
+        
+def iterate_through_keyfollower(queue):
+    pass
+
+
+
 
 
 def read_client_list(queue):

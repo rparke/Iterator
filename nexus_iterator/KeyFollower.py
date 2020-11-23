@@ -57,17 +57,6 @@ class Follower():
      
         
 
-# =============================================================================
-#     def get_current_max(self):
-#          current_max = []
-#          for key_path in self.key_datasets:
-#              for dataset in self.hdf5_file[key_path].values():
-#                  dataset.refresh()
-#                  current_max.append(np.nonzero(dataset[...].flatten())[0].max())
-#          return np.asarray(current_max).min()
-#          
-# =============================================================================
-
 
       
     def _is_next(self):
