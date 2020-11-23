@@ -29,6 +29,9 @@ result_list = []
 
 
 
+#thread 1: generate a queue of keys using Follower
+#thread 2: access the keys and setup batch jobs 
+
 #Iterate through the key generator
 def inc(x):
     return x.sum(axis = 3)
