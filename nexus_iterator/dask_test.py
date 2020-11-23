@@ -43,7 +43,7 @@ def iterate_through_datasource(queue):
         data = ['entry/Xspress3A/data']
         keys = ['entry/solstice_scan/keys']
         df = DataFollower(f, keys, data, timeout = 1)
-        for data in range(20):
+        for data in range(5):
             queue.put(next(df))
         queue.put(None)
         
@@ -68,6 +68,8 @@ def read_client_list(queue):
             queue.task_done()
             break
     
+
+
 
 
 
