@@ -20,126 +20,145 @@ import time
 import h5py
 from threading import Thread
 from queue import Queue
+import multiprocessing
 
 
 
-
-         
-
-#client = Client()
-result_list = []
-
-
-
-
-#thread 1: generate a queue of keys using Follower
-#thread 2: access the keys and setup batch jobs 
-
-#Iterate through the key generator
-def array_sum(x):
-    return x.sum(axis = 3)
-
-
-def iterate_through_datasource(queue):
-    with h5py.File("/home/eja26438/Documents/First_Year_Projects/Unique_Keys/Iterator_data/i18-81742.nxs", "r") as f:
-        
-        data = ['entry/Xspress3A/data']
-        keys = ['entry/solstice_scan/keys']
-        df = DataFollower(f, keys, data, timeout = 1)
-        for data in range(10):
-            queue.put(next(df))
-        queue.put(None)
+class ScalariseImage():
+    
+    def __init__(self,
+                 hdf5_filepath,
+                 dataset_path):
+        self.hdf5_filepath = hdf5_filepath
+        self.dataset_path = dataset_path
+        self.first_row_written = False
+        self.row_length = None
         
         
-def iterate_through_keyfollower(queue):
-    with h5py.File("/home/eja26438/Documents/First_Year_Projects/Unique_Keys/Iterator_data/i18-81742.nxs", "r") as f:
-        keys = ["entry/solstice_scan/keys"]
-        kf = Follower(f, keys, timeout = 10)
-        for key in kf:
-            queue.put(key)
-        queue.put(None)
-
-
-
-
-
-def read_client_list(queue):
-    client = Client()
-    while True:
-        frame = queue.get()
+        #Set of methods for indexing the image
+    def _first_row_written(self):
+        with h5py.File(self.hdf5_filepath, "r", swmr = True) as f:
+            shape = f[self.dataset_path].shape
+            print(shape[1])
+            if shape[1] > 1:
+                self.first_row_written = True
+                
+                
+    def _get_row_length(self):
+        while not self.first_row_written:
+            self._first_row_written()
+            print("Sleeping")
+            time.sleep(10)
         
-        if frame:
-            frame = frame[0]
-            result_list.append(frame.sum(axis = 3))
+        with h5py.File(self.hdf5_filepath, "r", swmr = True) as f:
+            shape = f[self.dataset_path].shape
+            self.row_length = shape[0]
+            return shape[0]
+                
+                
+    def _get_frame_index(self, index):
+        self._get_row_length()
+        if self.row_length == None:
+            class FirstRowNotWritten(Exception):pass
+            raise FirstRowNotWritten()
             
         else:
-            queue.task_done()
-            break
+            x_index = index//self.row_length
+            y_index = index%self.row_length
+            
+        return [x_index, y_index]
+    
+    
+    def get_frame(self, index):
+        x_index, y_index = self._get_frame_index(index)
+        with h5py.File(self.hdf5_filepath, "r", swmr = True) as f:
+            arr = f[self.dataset_path][x_index, y_index][...]
+            return arr
+            
+    
+    
+    def scalarise (self, index):
+        frame = self.get_frame(index)
+        return [frame.sum(), index]
+    
+    def scalarise_write(self, index):
+        frame = self.get_frame(index)
+        frame_sum = frame.sum()
+        
+        with open("/Users/richardparke/Documents/Diamond/Iterator_data/test_write.txt", "r+") as wrt:
+                  wrt.append(str(index) + ":" + str(frame_sum))
+             
+    
+    
+    
+scalar_test = ScalariseImage("/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs", 
+                             'entry/Xspress3A/data')
+
+
+
+
+def write_dask_futures():
+    client = Client()
+    scalar_array = []
+    start_time = time.time()
+    for index in range(1000):
+        client.submit(scalar_test.scalarise_write, index)
+    end_time = time.time()
+    print("Dask Futures Time: {}".format(end_time - start_time))
+
+
+
+def run_dask_futures():
+    client = Client()
+    scalar_array = []
+    start_time = time.time()
+    for index in range(1000):
+        scalar_array.append(client.submit(scalar_test.scalarise, index))
+    end_time = time.time()
+    print("Dask Futures Time: {}".format(end_time - start_time))
+    return [scalar_array, end_time - start_time]
     
 
+def run_map_dask_futures():
+    client = Client()
+    start_time = time.time()
+    scalar_array = client.map(scalar_test.scalarise, range(1000))
+    end_time = time.time()
+    print("Dask Futures Map Time: {}".format(end_time - start_time))
+    return [scalar_array, end_time - start_time]
+
+def run_serial_jobs():
+    scalar_array = []
+    start_time = time.time()
+    for index in range(1000):
+        scalar_array.append(scalar_test.scalarise(index))
+    end_time = time.time()
+    print("Normal Time: {}".format(end_time - start_time))
+    return [scalar_array, end_time - start_time]
 
 
+def run_map():
+    start_time = time.time()
+    scalar_array = map(scalar_test.scalarise, range(1000))
+    end_time = time.time()
+    print("Python Map Time: {}".format(end_time - start_time))
+    return [scalar_array, end_time - start_time]
 
-def create_dask_job(number_of_frames, queue, fn):
-    key_list = []
-    for i in range(number_of_frames):
-        key_list.append(queue.get())
-        
-    return_dict = {}
-    for key in key_list:
-        return_dict[str(key)] = key
-        return_dict["function_"+str(key)] = (fn, str(key))
-        
-    return return_dict
+
+def append_futures_to_list():
+    futures = run_dask_futures()
+    arr = np.ones(1000)
+    for f in futures[0]:
+        f = f.result()
+        result_index = f[1]
+        result_sum = f[0]
+        arr[result_index] = result_sum
+    return arr
+
+#arr = run_dask_futures()
+
+
     
-
-
-inc = lambda x:x+1
-add = lambda x,y: x+y
-
-
-d = {"x": 1,
-     "y": (inc, "x"),
-     "z": (add, "y", 10)}
-
-
-queue = Queue()
-for i in range(20):
-    queue.put(i)
-
-dsk = {"load-1":(queue.get()),
-       "load-2":(queue.get()),
-       "load-3":(queue.get()),
-       "load-4":(queue.get()),
-       "load-5":(queue.get()),
-       "evaluate-1": (lambda x:x**2, "load-1")}
-
-
-
-
-def file_creator(write_file, dataset_list, shape = (40960,)):
-    with h5py.File(write_file, "w", libver= "latest") as f:
-        for ds in dataset_list:
-            f.create_dataset(ds, chunks = (shape))
-        
-        
-def write_frame_to_file(write_file, dataset):
-    pass
-    
-        
-
-
-f = h5py.File("/home/eja26438/Documents/First_Year_Projects/Unique_Keys/Iterator_data/i18-81742.nxs", "r")
-
-
-
-grabber = Grabber(f, ['entry/Xspress3A/data', 'entry/Xspress3A/data'])
-
-
-
-
-
-
 
 
 

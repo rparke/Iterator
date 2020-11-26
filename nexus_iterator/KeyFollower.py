@@ -21,6 +21,7 @@ class Follower():
                      self.timeout = timeout
                      self.key_datasets = key_datasets
                      self.termination_conditions = termination_conditions
+                     self._finish_tag = False
 
                          
                          
@@ -34,6 +35,7 @@ class Follower():
             while not self._is_next():
                 time.sleep(0.2)
                 if self.is_finished():
+                    self._finish_tag = True
                     raise StopIteration
             
             if self._is_next():
@@ -43,6 +45,7 @@ class Follower():
                 return x
         
         else:
+            self._finish_tag = True
             raise StopIteration
     
         
@@ -50,6 +53,7 @@ class Follower():
     def reset(self):
         self.current_key = -1
         self.current_max = -1
+        self._finish_tag = False
         
     def _timer_reset(self):
         self.start_time = time.time()
