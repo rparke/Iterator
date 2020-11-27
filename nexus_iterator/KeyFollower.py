@@ -5,11 +5,50 @@ import time
 from multiprocessing import Process
     
 
-class SwmrProcess(Process):
-    pass
+
 
 
 class Follower():
+    '''Iterator for following keys datasets in nexus files
+    
+    Parameters
+    ----------
+    hdf5_file: h5py.File
+        Instance of h5py.File object. Choose the file containing data you wish
+        to follow.
+        
+    key_datasets: list
+        A list of paths (as strings) to groups in hdf5_file containing unique
+        key datasets.
+        
+    timeout: int (optional)
+        The maximum time allowed for a dataset to update before the timeout
+        termination condition is trigerred and iteration is halted. If a value
+        is not set this will default to 10 seconds.
+        
+    termination_conditions: list (optional)
+        A list of strings containing conditions for stopping iteration. Set as
+        timeout by default.
+        
+    Examples
+    --------
+    
+    
+    >>> # open hdf5 file using context manager with swmr mode activated
+    >>> with h5py.File("/home/documents/work/data/example.h5", "r", swmr = True) as f:
+    >>> # create an instance of the Follower object to iterate through
+    >>>     kf = Follower(f, 
+    >>>                   ['path/to/key/group/one', 'path/to/key/group/two'], 
+    >>>                   timeout = 1, 
+    >>>                   termination_conditions = ['timeout'])
+    >>> # iterate through the iterator as with a standard iterator/generator object
+    >>>     for key in kf:
+    >>>         print(key)
+    
+    
+    
+    '''
+    
     def __init__(self,
                  hdf5_file,
                  key_datasets,
@@ -51,6 +90,7 @@ class Follower():
         
     
     def reset(self):
+        '''Reset the iterator to start again from index 0'''
         self.current_key = -1
         self.current_max = -1
         self._finish_tag = False

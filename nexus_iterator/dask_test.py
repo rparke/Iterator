@@ -14,7 +14,7 @@ from nexus_iterator.FrameGrabber import Grabber
 
 import numpy as np
 import dask
-from dask.distributed import Client
+from dask.distributed import Client, as_completed
 from dask.threaded import get
 import time
 import h5py
@@ -31,25 +31,10 @@ class ScalariseImage():
                  dataset_path):
         self.hdf5_filepath = hdf5_filepath
         self.dataset_path = dataset_path
-        self.first_row_written = False
         self.row_length = None
         
-        
-        #Set of methods for indexing the image
-    def _first_row_written(self):
-        with h5py.File(self.hdf5_filepath, "r", swmr = True) as f:
-            shape = f[self.dataset_path].shape
-            print(shape[1])
-            if shape[1] > 1:
-                self.first_row_written = True
                 
-                
-    def _get_row_length(self):
-        while not self.first_row_written:
-            self._first_row_written()
-            print("Sleeping")
-            time.sleep(10)
-        
+    def _get_row_length(self):        
         with h5py.File(self.hdf5_filepath, "r", swmr = True) as f:
             shape = f[self.dataset_path].shape
             self.row_length = shape[0]
@@ -58,14 +43,8 @@ class ScalariseImage():
                 
     def _get_frame_index(self, index):
         self._get_row_length()
-        if self.row_length == None:
-            class FirstRowNotWritten(Exception):pass
-            raise FirstRowNotWritten()
-            
-        else:
-            x_index = index//self.row_length
-            y_index = index%self.row_length
-            
+        x_index = index%self.row_length
+        y_index = index//self.row_length
         return [x_index, y_index]
     
     
@@ -81,21 +60,35 @@ class ScalariseImage():
         frame = self.get_frame(index)
         return [frame.sum(), index]
     
-    def scalarise_write(self, index):
-        frame = self.get_frame(index)
-        frame_sum = frame.sum()
         
-        with open("/Users/richardparke/Documents/Diamond/Iterator_data/test_write.txt", "r+") as wrt:
-                  wrt.append(str(index) + ":" + str(frame_sum))
-             
     
+def scalarise(index,
+              hdf5_file = "/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs", 
+                             dataset = 'entry/Xspress3A/data'):
+    
+    si = ScalariseImage(hdf5_file, dataset)
+    frame = si.get_frame(index)
+    return [frame.sum(), index]
+
+def double(index,
+              hdf5_file = "/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs", 
+                             dataset = 'entry/Xspress3A/data'):
+    
+    si = ScalariseImage(hdf5_file, dataset)
+    frame = si.get_frame(index)
+    return [frame + np.ones(frame.shape)*1000, index]
     
     
 scalar_test = ScalariseImage("/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs", 
                              'entry/Xspress3A/data')
 
 
-
+def create_key_queue(hdf5_filepath, key_datasets, queue):
+    with h5py.File(hdf5_filepath, "r", swmr = True) as f:
+        kf = Follower(f, key_datasets)
+        for key in kf:
+            queue.put(key)
+        queue.put("End")
 
 def write_dask_futures():
     client = Client()
@@ -108,12 +101,16 @@ def write_dask_futures():
 
 
 
-def run_dask_futures():
+def run_dask_futures(queue, scalar_array):
     client = Client()
-    scalar_array = []
     start_time = time.time()
-    for index in range(1000):
-        scalar_array.append(client.submit(scalar_test.scalarise, index))
+    while True:
+        current_key = queue.get()
+        if current_key == "End":
+            break
+        
+        else:
+            scalar_array.append(client.submit(scalar_test.scalarise, current_key))
     end_time = time.time()
     print("Dask Futures Time: {}".format(end_time - start_time))
     return [scalar_array, end_time - start_time]
@@ -130,10 +127,10 @@ def run_map_dask_futures():
 def run_serial_jobs():
     scalar_array = []
     start_time = time.time()
-    for index in range(1000):
+    for index in range(2800):
         scalar_array.append(scalar_test.scalarise(index))
     end_time = time.time()
-    print("Normal Time: {}".format(end_time - start_time))
+    print("Python Serial Time: {}".format(end_time - start_time))
     return [scalar_array, end_time - start_time]
 
 
@@ -155,10 +152,36 @@ def append_futures_to_list():
         arr[result_index] = result_sum
     return arr
 
-#arr = run_dask_futures()
 
+def result_printer(futures_array):
+    for future in as_completed(futures_array):
+        print(future)
+    return
 
+def main():
+    queue = Queue()
+    futures_array = []
+    t_queue_writer = Thread(name = "queue_writer", target = create_key_queue("/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs",
+                                                                             ['entry/solstice_scan/keys'],
+                                                                             queue))
+    t_dask_consumer = Thread(name = "dask_consumer", target = run_dask_futures(queue = queue, scalar_array = futures_array))
+    t_result_printer = Thread(name = "result_printer", target = result_printer(futures_array))
+    t_queue_writer.start()
+    t_dask_consumer.start()
+    t_result_printer.start()
+    t_queue_writer.join()
+    t_dask_consumer.join()
+    t_result_printer.join()
+    return futures_array
     
 
+if __name__ == "__main__":
+     arr = main()
+ 
+
+f = h5py.File("write_test.h5", "w", libver = "latest", swmr = "True")
+test_dataset = f.create_dataset("test_resize", shape = (1,1,1,1), chunks = (1,1,1,1), maxshape = (None, None, 1, 1))
+shape = test_dataset.shape
+test_dataset.resize((1,2,1,1))
 
 
