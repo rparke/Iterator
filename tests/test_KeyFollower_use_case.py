@@ -97,7 +97,8 @@ def test_update_changes_shape():
     assert current_key == 50
     
     
-def test_finish_flag():
-    key_paths = ["keys"]
-    f = {"keys":{"complete": Dataset.complete_dataset()}, "finish_tag": True}
+
+    
+
+
     

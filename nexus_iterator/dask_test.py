@@ -63,8 +63,8 @@ class ScalariseImage():
         
     
 def scalarise(index,
-              hdf5_file = "/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs", 
-                             dataset = 'entry/Xspress3A/data'):
+              hdf5_file = "test_big_data.h5", 
+                             dataset = 'datasets/data_1'):
     
     si = ScalariseImage(hdf5_file, dataset)
     frame = si.get_frame(index)
@@ -119,7 +119,7 @@ def run_dask_futures(queue, scalar_array):
 def run_map_dask_futures():
     client = Client()
     start_time = time.time()
-    scalar_array = client.map(scalar_test.scalarise, range(1000))
+    scalar_array = client.map(scalar_test.scalarise, range(5628))
     end_time = time.time()
     print("Dask Futures Map Time: {}".format(end_time - start_time))
     return [scalar_array, end_time - start_time]
@@ -175,13 +175,12 @@ def main():
     return futures_array
     
 
-if __name__ == "__main__":
-     arr = main()
- 
+# =============================================================================
+# if __name__ == "__main__":
+#      arr = main()
+#  
+# =============================================================================
 
-f = h5py.File("write_test.h5", "w", libver = "latest", swmr = "True")
-test_dataset = f.create_dataset("test_resize", shape = (1,1,1,1), chunks = (1,1,1,1), maxshape = (None, None, 1, 1))
-shape = test_dataset.shape
-test_dataset.resize((1,2,1,1))
+
 
 
