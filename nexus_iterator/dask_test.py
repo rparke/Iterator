@@ -8,9 +8,8 @@ Created on Wed Nov 18 14:20:34 2020
 
 #import nexus_iterator.KeyFollower as KeyFollower
 #import nexus_iterator.DataSource as DataSource
-from nexus_iterator.KeyFollower import Follower
+from nexus_iterator.KeyFollower import Follower, FrameGrabber
 from nexus_iterator.DataSource import DataFollower
-from nexus_iterator.FrameGrabber import Grabber
 
 import numpy as np
 import dask
@@ -175,11 +174,38 @@ def main():
     return futures_array
     
 
-# =============================================================================
-# if __name__ == "__main__":
-#      arr = main()
-#  
-# =============================================================================
+
+
+with h5py.File("/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs", "r") as f:
+    fg = FrameGrabber('entry/Xspress3A/data', f)
+    ds = f['entry/Xspress3A/data']
+    print(fg.Grabber(20))
+    print(fg.Grabber(20).shape)
+
+
+
+
+
+class Scalarise():
+    def __init__(self,
+                 hdf5_file,
+                 datasets):
+        self.hdf5_file = hdf5_file
+        self.datasets = datasets
+    
+    def scl(self, index):
+        with h5py.File(self.hdf5_file, "r", swmr = True) as f:
+            fg = FrameGrabber(self.datasets, f)
+            frame = fg.Grabber(index)
+            frame_shape = [1 for i in range(len(frame.shape))]
+            frame = frame.sum()
+            frame = frame.reshape(frame_shape)
+            return frame
+
+sc = Scalarise("/Users/richardparke/Documents/Diamond/Iterator_data/i18-81742.nxs", 'entry/Xspress3A/data')
+
+
+
 
 
 

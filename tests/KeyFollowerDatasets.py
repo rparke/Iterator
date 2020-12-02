@@ -58,3 +58,8 @@ def small_incomplete_dataset():
     small_incomplete_array = np.arange(25)+1
     small_incomplete_array = small_incomplete_array.reshape(5,5,1,1)
     return create_dataset_from_numpy_array(small_incomplete_array)
+
+
+#The KeyFollower.Follower should iterate 50 times and the values produced should be 0-49
+def complete_dataset_random_integers():
+    return create_dataset_from_numpy_array(np.random.randint(10, 5000 + 1, size = (5,10,1,1)))

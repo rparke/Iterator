@@ -30,6 +30,8 @@ class Follower():
         A list of strings containing conditions for stopping iteration. Set as
         timeout by default.
         
+
+        
     Examples
     --------
     
@@ -68,7 +70,7 @@ class Follower():
         return(self)
     
     def __next__(self):
-        
+
         self._timer_reset()
         if not self.is_finished():
             while not self._is_next():
@@ -90,22 +92,20 @@ class Follower():
         
     
     def reset(self):
-        '''Reset the iterator to start again from index 0'''
+        '''Reset the iterator to start again from index 0
+        '''
         self.current_key = -1
         self.current_max = -1
         self._finish_tag = False
         
     def _timer_reset(self):
+        # Hidden method, restarts timer for timeout method
         self.start_time = time.time()
-                             
-     
         
-
-
+    
       
     def _is_next(self):
-        
-        
+        # returns true if all the keys for index current_key + 1 are nonzero
         is_next = True
         
         for key_path in self.key_datasets:
@@ -149,6 +149,23 @@ class Follower():
         
         else:
             return False
+        
+    def _any_next(self):
+        any_next = True
+        
+        for key_path in self.key_datasets:
+            for dataset in self.hdf5_file[key_path].values():
+                dataset.refresh()
+                #print(dataset.flatten()[self.current_key+1])
+                
+                try:
+                    if (dataset[...].flatten()[self.current_key+1:] == 0).all():
+                        any_next = False
+                    else:
+                        pass
+                except:
+                    any_next = False
+        return any_next
 
 
 
@@ -162,4 +179,33 @@ class Follower():
             
     def _reshape_flat_dataset(self):
         pass
+    
+    
+class FrameGrabber():
+    def __init__(self, dataset, hdf5_file):
+        self.dataset = dataset
+        self.hdf5_file = hdf5_file
+        
+    def Grabber(self, index):
+        ds =  self.hdf5_file[self.dataset]
+        self.ds_shape = ds.shape
+        self.ds_frame_shape = ds.shape[-2:]
+        return_shape = [1]*(len(self.ds_shape)-2)
+        print(return_shape)
+        return_shape.append(self.ds_frame_shape[-2])
+        return_shape.append(self.ds_frame_shape[-1])
+        print(return_shape)
+        frame =  ds[self._get_frame_index(index)]
+        frame = frame.reshape(return_shape)
+        return frame
+    
+    
+    def _get_frame_index(self, index):
+        ds = self.hdf5_file[self.dataset]
+        self.ds_shape = ds.shape
+        self.ds_frame_shape = ds.shape[-2:]
+        ds_frame_index = np.unravel_index(index, self.ds_shape[:-2])
+        return ds_frame_index
+            
+             
     

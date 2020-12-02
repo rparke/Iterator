@@ -29,14 +29,33 @@ class DataFollower():
         else:
             
             current_dataset_index = next(self.kf)
-            current_dataset_slice = self._get_dataset_flattened(current_dataset_index)
-    
             
+            #Old method, works but a lot of code
+            current_dataset_slice = self._get_dataset_flattened(current_dataset_index)
+            
+            #New method, not currently working, gets index using np.unravel_index method
+            #current_dataset_slice = self._get_dataset_shaped(current_dataset_index)
             return current_dataset_slice
         
         
     def reset(self):
         self.kf.reset()
+        
+        
+    #Currently broken    
+    def _get_dataset_shaped(self, current_dataset_index):
+        return_list = []
+        for dataset_path in self.dataset_paths:
+            dataset = self.hdf5_file[dataset_path]
+            dataset.refresh()
+            dataset_shape = list(dataset.shape)
+            dataset_index = np.unravel_index(current_dataset_index, dataset_shape)
+            dataset = dataset[dataset_index[-2:]]
+            dataset_shape[-2:] = [1]*(len(dataset_shape)-1)
+            dataset = dataset.reshape(dataset_shape)
+            
+            return_list.append(dataset)
+        return return_list
         
         
     def _get_dataset_flattened(self, current_dataset_index):

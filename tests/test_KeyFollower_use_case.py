@@ -5,11 +5,6 @@ from nexus_iterator import KeyFollower
 from unittest.mock import Mock, patch, MagicMock
 import KeyFollowerDatasets as Dataset
 
-
-
-
-
-
       
 def test_iterates_complete_dataset():
           
@@ -97,6 +92,23 @@ def test_update_changes_shape():
     assert current_key == 50
     
     
+def test_index_independent_of_key_value():
+    key_paths = ['keys']
+    f = {"keys":{"small_incomplete": Dataset.complete_dataset_random_integers()}}
+    current_key = 0
+    kf = KeyFollower.Follower(f, key_paths, timeout = 0.1)
+    for key in kf:
+        assert current_key == key
+        current_key +=1
+    
+
+
+#Test and Feature to be added
+# Given array of this form[..., 30, 0, 32, ...] if iterator was at the 30th index
+#It should be able to detect that there are non-zero keys ahead of the 0 key and infer that it should
+#Skip this key and return the index of the next non-zero key
+def test_skip_dead_frame():
+    pass
 
     
 
