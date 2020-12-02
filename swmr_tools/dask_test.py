@@ -8,8 +8,8 @@ Created on Wed Nov 18 14:20:34 2020
 
 #import nexus_iterator.KeyFollower as KeyFollower
 #import nexus_iterator.DataSource as DataSource
-from nexus_iterator.KeyFollower import Follower, FrameGrabber
-from nexus_iterator.DataSource import DataFollower
+from swmr_tools.KeyFollower import Follower, FrameGrabber
+from swmr_tools.DataSource import DataFollower
 
 import numpy as np
 import dask
