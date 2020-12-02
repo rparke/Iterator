@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 import os
-from nexus_iterator import KeyFollower
+from swmr_tools import KeyFollower
 import time
 
 

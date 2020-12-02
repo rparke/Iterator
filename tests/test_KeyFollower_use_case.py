@@ -1,7 +1,7 @@
 import numpy as np
 import h5py
 import pytest
-from nexus_iterator import KeyFollower
+from swmr_tools import KeyFollower
 from unittest.mock import Mock, patch, MagicMock
 import KeyFollowerDatasets as Dataset
 
