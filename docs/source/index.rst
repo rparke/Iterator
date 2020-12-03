@@ -10,6 +10,8 @@ Welcome to swmr_tools's documentation!
    :maxdepth: 2
    :caption: Contents:
    
+   getting_started
+   keyfollower
    modules 
 
 
