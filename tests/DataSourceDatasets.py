@@ -3,7 +3,9 @@ import h5py
 import pytest
 import os
 from swmr_tools import DataSource
+
 from swmr_tools import KeyFollower
+
 from unittest.mock import MagicMock, Mock, patch
 
 
