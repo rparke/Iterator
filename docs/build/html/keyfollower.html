@@ -15,7 +15,7 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="swmr_tools" href="modules.html" />
+    <link rel="next" title="Boosting Performance with Dask" href="performance_enhancements_with_dask.html" />
     <link rel="prev" title="Getting Started" href="getting_started.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -28,7 +28,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="modules.html" title="swmr_tools"
+          <a href="performance_enhancements_with_dask.html" title="Boosting Performance with Dask"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="getting_started.html" title="Getting Started"
@@ -101,7 +101,7 @@ resources and is less verbose than using exception handling.</p>
 <p>Instances of the Follower class are iterators. They can be used within for
 loops or called using the next method</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr_mode</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">kf</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">)</span>
+    <span class="n">kf</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">])</span>
     <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">kf</span><span class="p">))</span>
 <span class="mi">1</span>
     <span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">kf</span><span class="p">))</span>
@@ -120,7 +120,7 @@ loops or called using the next method</p>
 <span class="mi">8</span>
 
 <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr_mode</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">kf</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">)</span>
+    <span class="n">kf</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">kf</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
 <span class="mi">1</span>
@@ -137,6 +137,8 @@ loops or called using the next method</p>
 </div>
 <div class="section" id="framegrabber">
 <h2>FrameGrabber<a class="headerlink" href="#framegrabber" title="Permalink to this headline">¶</a></h2>
+<p>Indices produced by instances of the KeyFollower class correspond to frames of
+relavent datasets</p>
 </div>
 </div>
 
@@ -164,8 +166,8 @@ loops or called using the next method</p>
   <p class="topless"><a href="getting_started.html"
                         title="previous chapter">Getting Started</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="modules.html"
-                        title="next chapter">swmr_tools</a></p>
+  <p class="topless"><a href="performance_enhancements_with_dask.html"
+                        title="next chapter">Boosting Performance with Dask</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -197,7 +199,7 @@ loops or called using the next method</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="modules.html" title="swmr_tools"
+          <a href="performance_enhancements_with_dask.html" title="Boosting Performance with Dask"
              >next</a> |</li>
         <li class="right" >
           <a href="getting_started.html" title="Getting Started"
