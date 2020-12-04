@@ -232,10 +232,8 @@ class FrameGrabber():
         self.ds_frame_shape = ds.shape[-2:]
         
         return_shape = [1]*(len(self.ds_shape)-2)
-        print(return_shape)
         return_shape.append(self.ds_frame_shape[-2])
         return_shape.append(self.ds_frame_shape[-1])
-        print(return_shape)
         frame =  ds[self._get_frame_index(index)]
         frame = frame.reshape(return_shape)
         return frame
