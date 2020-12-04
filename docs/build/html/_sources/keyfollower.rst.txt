@@ -67,7 +67,7 @@ Instances of the Follower class are iterators. They can be used within for
 loops or called using the next method ::
 
     with h5py.File("test_file.h5", "r", swmr_mode = True) as f:
-        kf = Follower(f, "keys")
+        kf = Follower(f, ["keys"])
         print(next(kf))
     1
         print(next(kf))
@@ -86,7 +86,7 @@ loops or called using the next method ::
     8
     
     with h5py.File("test_file.h5", "r", swmr_mode = True) as f:
-        kf = Follower(f, "keys")
+        kf = Follower(f, ["keys"])
         for i in kf:
             print(i)
     1
@@ -100,3 +100,6 @@ loops or called using the next method ::
 
 FrameGrabber
 ============
+
+Indices produced by instances of the KeyFollower class correspond to frames of
+relavent datasets

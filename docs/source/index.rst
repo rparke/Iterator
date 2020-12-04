@@ -12,6 +12,8 @@ Welcome to swmr_tools's documentation!
    
    getting_started
    keyfollower
+   datasource
+   performance_enhancements_with_dask
    modules 
 
 
