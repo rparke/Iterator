@@ -113,77 +113,76 @@ index [1,0] does not change to a non-zero value within the 1 second timeout.
 Example - Using other termination methods
 -----------------------------------------
 
-The timeout method is 
+The timeout method is the default for halting iteration. Other methods can be
+used by passing a list of method names (as strings) as an argument when 
+instantiating the Follower ::
 
-
-
-Follower does not have any inbuilt methods for managing resources, as such
-it is the responsibility of the user to ensure that hdf5 files are opened and
-closed correctly. This can either be done using exception handling or using
-the context manager
-
-Exception Handling 
-^^^^^^^^^^^^^^^^^^
-::
-
-    try:
-        f = h5py.File("test_file.h5", "r", swmr_mode = True)
-        kf = Follower(f, "keys")
+    with h5py.File("test_file.h5" "r", swmr_mode = True) as f:
+        kf = Follower(f, ["keys"], termination_conditions = ["always_true"])
         for key in kf:
-        ...
-    finally:
-        f.close()
-
-Context Manager
-^^^^^^^^^^^^^^^
-::
-
-    with h5py.File("test_file.h5", "r", swmr_mode = True) as f:
-        kf = Follower(f, "keys")
-        for key in kf:
-        ...
-
-Manual opening and closing of h5py.File objects is not recommneded.
-We strongly recommend using the context manger as it ensures safe access to
-resources and is less verbose than using exception handling.
-
-Instances of the Follower class are iterators. They can be used within for
-loops or called using the next method ::
-
-    with h5py.File("test_file.h5", "r", swmr_mode = True) as f:
-        kf = Follower(f, ["keys"])
-        print(next(kf))
+            print(key)
+    0
     1
-        print(next(kf))
     2
-        print(next(kf))
     3
-        print(next(kf))
-    4
-        print(next(kf))
-    5
-        print(next(kf))
-    6
-        print(next(kf))
-    7
-        print(next(kf))
-    8
     
-    with h5py.File("test_file.h5", "r", swmr_mode = True) as f:
-        kf = Follower(f, ["keys"])
-        for i in kf:
-            print(i)
-    1
-    2
-    3
-    4
-    5
-    6
-    7
-    8
+As expected, we see the same outcome above as when a timeout was used. What
+has happened is that whilever there were non-zero keys the iterator behaved as 
+normal. As soon as the next available key was zero the iterator stopped 
+straight away (rather than waiting for a timeout).
+
 
 FrameGrabber
 ============
 
 Indices produced by instances of the KeyFollower class correspond to frames of
-relavent datasets
+relavent datasets. To understand how the FrameGrabber class works it is important
+to understand that instances of Follower do **not** return the value of a key,
+they return the index of the key for a flattened version of the array. We will
+demonstrate this with an example ::
+
+    
+    complete_key_array = np.random.randint(low = 10, high = 20000, size = (2,4))
+    with h5py.File("test_file.h5", "w", libver = "latest") as f:
+        f.create_group("keys")
+        f["keys"].create_dataset("key_1", data = complete_key_array)
+        
+        #print dataset to demonstrate the non-sequential nature of the keys
+        print(f["keys/key_1"][...])
+    array([[15083, 15092, 15918, 11475], 
+    [10070,  9500, 15115,  8331]])
+       
+As you can see above the key values are all non-zero, however they are not in
+sequential order and many of the values are quite high. When using an instance 
+of the KeyFollower to iterate through this we simply recieve an index ::
+
+    with h5py.File("test_file.h5", "r", swmr = True) as f:
+        kf = Follower(f, ["keys"], timeout = 1)
+        for key in kf:
+            print(key)
+    0
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+
+If we just want to access the value corresponding to the index we can use
+numpys unravel_index() method ::
+
+    with h5py.File("test_file.h5", "r", swmr = True) as f:
+        print(f["keys/key_1"][np.unravel_index(6, shape = (2,4))])
+    15115
+
+This is fine for extracting a scalar, but does not help when trying to extract
+a vector valued frame from a dataset. For this purpose we have created the
+FrameGrabber class.
+    
+
+
+
+
+
+
