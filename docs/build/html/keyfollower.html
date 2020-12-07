@@ -52,31 +52,105 @@ two main classes:</p>
 <li><p>Follower</p></li>
 <li><p>FrameGrabber</p></li>
 </ul>
+<p>This tutorial assumes a basic level of skill using the h5py library.
+Specifically, you should be comfortable with using h5py to:</p>
+<ul class="simple">
+<li><p>Open and create hdf5_files</p></li>
+<li><p>Navigate files using python dictionary methods: <em>e.g.</em> using the get() method</p></li>
+<li><p>Create groups and datasets</p></li>
+</ul>
+<p>If you are unfamiliar with how to do any of this we recommend reading the
+h5py quick start guide: <a class="reference external" href="https://docs.h5py.org/en/stable/quick.html">https://docs.h5py.org/en/stable/quick.html</a></p>
 <div class="section" id="follower">
 <h2>Follower<a class="headerlink" href="#follower" title="Permalink to this headline">¶</a></h2>
+<p>The Follower class can be used to create instances of a python iterator object.
+The Follower is central to everything that swmr_tools does and most other
+classes either directly use it or are dependent upon the keys it produces.</p>
+<div class="section" id="example-iteration-through-an-all-non-zero-key-dataset">
+<h3>Example - Iteration through an all non-zero key dataset<a class="headerlink" href="#example-iteration-through-an-all-non-zero-key-dataset" title="Permalink to this headline">¶</a></h3>
+<p>We will create a dataset of non-zero integers, respresenting a complete set of
+scans all flushed to disk</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">h5py</span>
-<span class="kn">import</span> <span class="nn">swmr_tools</span>
+<span class="kn">from</span> <span class="nn">swmr_tools.KeyFollower</span> <span class="kn">import</span> <span class="n">Follower</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#create a sequential array of the numbers 1-8 and reshape them into an array</span>
+<span class="c1"># of shape (2,4,1,1)</span>
 <span class="n">complete_key_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 </pre></div>
 </div>
-<p>We will create an empty hdf5 file using the context manager:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">libver</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">pass</span>
-</pre></div>
-</div>
-<p>We will save this array to a dataset in our hdf5 file</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span>
+<p>We will create an empty hdf5 file, create a group called “keys” and create
+a dataset in that group called “key_1” where we will add our array of non-zero
+keys</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">libver</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;keys&quot;</span><span class="p">)</span>
     <span class="n">f</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;key_1&quot;</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">complete_key_array</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>Next, we shall create an instance of the Follower class and demonstrate a
+simple example of its use. At a minimum we must pass the h5py.File object
+we wish to read from and a list containing the paths to the hdf5 groups
+containing our keys.</p>
+<p>Shown below is an example of using an instance of Follower within a for loop,
+as you would with any standard iterable object. For this basic example of a
+dataset containing only non-zero values, the loop runs 8 times and stops as
+expected</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># using an instance of Follower in a for loop</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">kf</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kf</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+<span class="mi">0</span>
+<span class="mi">1</span>
+<span class="mi">2</span>
+<span class="mi">3</span>
+<span class="mi">4</span>
+<span class="mi">5</span>
+<span class="mi">6</span>
+<span class="mi">7</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="example-iteration-through-a-dataset-containg-zeros">
+<h3>Example - Iteration through a dataset containg zeros<a class="headerlink" href="#example-iteration-through-a-dataset-containg-zeros" title="Permalink to this headline">¶</a></h3>
+<p>The key dataset is a form of metadata which (as we will see in
+detail when looking at the FrameGrabber class) represents whether a frame of
+a given dataset is complete and has been flushed to disk.</p>
+<p>Non-zero key values represent frames that have been completely written and
+flushed to disk, while values of zero represent a frame that has not. We
+therefore expect the iterator to halt when the next key is zero and either to
+wait for it to update to a non-zero value and continue or to stop iteration
+entirely if a termination condition is met.</p>
+<p>We will demonstrate a simple example of this below using a timeout method as
+a termination condition. Timeout is the default method used by Follower
+(although others can be set)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r+&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="c1">#set all values in the second row to zero</span>
+    <span class="n">f</span><span class="p">[</span><span class="s2">&quot;keys/key_1&quot;</span><span class="p">][</span><span class="mi">1</span><span class="p">,:,:,:]</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">kf</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">],</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kf</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+<span class="mi">0</span>
+<span class="mi">1</span>
+<span class="mi">2</span>
+<span class="mi">3</span>
+</pre></div>
+</div>
+<p>The example above clearly shows that the follower iterates through the first
+row waits for the timeout and then proceeds to halt iteration when the key at
+index [1,0] does not change to a non-zero value within the 1 second timeout.</p>
+</div>
+<div class="section" id="example-using-other-termination-methods">
+<h3>Example - Using other termination methods<a class="headerlink" href="#example-using-other-termination-methods" title="Permalink to this headline">¶</a></h3>
+<p>The timeout method is</p>
 <p>Follower does not have any inbuilt methods for managing resources, as such
 it is the responsibility of the user to ensure that hdf5 files are opened and
 closed correctly. This can either be done using exception handling or using
 the context manager</p>
 <div class="section" id="exception-handling">
-<h3>Exception Handling<a class="headerlink" href="#exception-handling" title="Permalink to this headline">¶</a></h3>
+<h4>Exception Handling<a class="headerlink" href="#exception-handling" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">try</span><span class="p">:</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr_mode</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
     <span class="n">kf</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">)</span>
@@ -88,7 +162,7 @@ the context manager</p>
 </div>
 </div>
 <div class="section" id="context-manager">
-<h3>Context Manager<a class="headerlink" href="#context-manager" title="Permalink to this headline">¶</a></h3>
+<h4>Context Manager<a class="headerlink" href="#context-manager" title="Permalink to this headline">¶</a></h4>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;test_file.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr_mode</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">kf</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kf</span><span class="p">:</span>
@@ -135,6 +209,7 @@ loops or called using the next method</p>
 </div>
 </div>
 </div>
+</div>
 <div class="section" id="framegrabber">
 <h2>FrameGrabber<a class="headerlink" href="#framegrabber" title="Permalink to this headline">¶</a></h2>
 <p>Indices produced by instances of the KeyFollower class correspond to frames of
@@ -153,8 +228,13 @@ relavent datasets</p>
   <ul>
 <li><a class="reference internal" href="#">KeyFollower</a><ul>
 <li><a class="reference internal" href="#follower">Follower</a><ul>
+<li><a class="reference internal" href="#example-iteration-through-an-all-non-zero-key-dataset">Example - Iteration through an all non-zero key dataset</a></li>
+<li><a class="reference internal" href="#example-iteration-through-a-dataset-containg-zeros">Example - Iteration through a dataset containg zeros</a></li>
+<li><a class="reference internal" href="#example-using-other-termination-methods">Example - Using other termination methods</a><ul>
 <li><a class="reference internal" href="#exception-handling">Exception Handling</a></li>
 <li><a class="reference internal" href="#context-manager">Context Manager</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a class="reference internal" href="#framegrabber">FrameGrabber</a></li>
