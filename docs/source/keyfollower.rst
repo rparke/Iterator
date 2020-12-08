@@ -178,7 +178,109 @@ numpys unravel_index() method ::
 
 This is fine for extracting a scalar, but does not help when trying to extract
 a vector valued frame from a dataset. For this purpose we have created the
-FrameGrabber class.
+FrameGrabber class
+
+
+Using FrameGrabber to Extract Frames from a key index
+-----------------------------------------------------
+
+
+First, we will create a small dataset with a corresponding key dataset containing
+with all values non-zero ::
+
+    complete_key_dataset = np.arange(4).reshape(2,2,1,1) + 1
+    complete_data_dataset = np.random.randint(low = 0, high = 1000, size = (2,2,5,10))
+    with h5py.File("test_file.h5", "w", libver = "latest") as f:
+        f.create_group("keys")
+        f.create_group("data")
+        f["keys"].create_dataset("key_1", data = complete_key_dataset)
+        f["data"].create_dataset("data_1", data = complete_data_dataset)
+        
+        
+
+FrameGrabber takes two arguments, the full path to the dataset you want to
+extract frames from and an open h5py.File object containing the dataset. To 
+extract a frame, call the method FrameGrabber.Grabber() with the key index ::
+
+    with h5py.File("test_file.h5", "r", swmr = True) as f:
+        kf = Follower(f, ["keys"], timeout = 1)
+        fg = FrameGrabber("data/data_1", f)
+        for key in kf:
+        
+            frame = fg.Grabber(key)
+            print(f"Printing frame {key}:")
+            print(frame +"\n")
+            print(f"Shape of frame: {frame}")
+            
+    Printing frame 0:
+    [[[[913  25 989  89 425 221 634 947 510 616]
+       [819  56 268 162 474 543 471 368 948 295]
+       [723 453 937 548 473 463 542 230 759 567]
+       [517 821 388 941 523 420 564 606 491 985]
+       [427 967 845 115 526 812 742 419 411 531]]]]
+    Shape: (1, 1, 5, 10)
+       
+    Printing frame 1: 
+    [[[[533 411 801 739 470 908 493 634 137 678]
+       [862 382 633 113 952 152 520 937 413 685]
+       [414 985  69 161  69  53 453 978 846 953]
+       [ 94 346 223 891 499 992 888 846 573 507]
+       [139 345 834 396 445 789 361  73 504 500]]]]
+    Shape: (1, 1, 5, 10)
+       
+    Printing frame 2: 
+    [[[[492 428 465 627 165 583 558 868 133  64]
+       [926 732 564 725 424 144 991 139 114 356]
+       [941 653 303 665 768 384 894 239 720 510]
+       [663 815 228 888 325 356 293 225 481 700]
+       [155 506 906  29 307 589  16 264 616  88]]]]
+    Shape: (1, 1, 5, 10)
+       
+    Printing frame 3:
+    [[[[376  22 142 805 266 176 824  85 886 771]
+       [403 795 603 528 349 117 384 176 186 324]
+       [561 467 322 430 792 977 606 906 833 243]
+       [954 466 125 597 959 245 699  36 254 410]
+       [943 629 468 131 657 717 734 482 657 895]]]]
+    Shape: (1, 1, 5, 10)
+       
+       
+The above example demonstrates the ability of the FrameGrabber class to
+return corresponding vector-valued dataset frames of the correct shape. This
+lets us do operations frame by frame live as frames are being written. Below
+is a simple data reduction example where we return the sum of each frame ::
+
+    with h5py.File("test_file.h5", "r", swmr = True) as f:
+        kf = Follower(f, ["keys"], timeout = 1)
+        fg = FrameGrabber("data/data_1", f)
+        for key in kf:
+            current_frame = fg.Grabber(key)
+            data_reduced_frame = current_frame.sum()
+            data_reduced_frame = data_reduced_frame.reshape((1,1,1,1))
+            print(f"Printing frame number {key}")
+            print(f"Frame = {data_reduced_frame}\n Shape = {data_reduced_frame.shape}\n")
+    
+    Printing frame number 0
+    Frame = [[[[25616]]]] 
+    Shape = (1, 1, 1, 1)
+    
+    Printing frame number 1
+    Frame = [[[[25727]]]]
+    Shape = (1, 1, 1, 1)
+    
+    Printing frame number 2
+    Frame = [[[[23705]]]]
+    Shape = (1, 1, 1, 1)
+    
+    Printing frame number 3
+    Frame = [[[[28003]]]] 
+    Shape = (1, 1, 1, 1)
+     
+
+     
+
+        
+
     
 
 

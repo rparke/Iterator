@@ -1,6 +1,6 @@
-##############################
-Boosting Performance with Dask
-##############################
+#######################################################
+Interfacing with Dask for Performance Boosts
+#######################################################
 
 
 Dask is an open source library in python for parallel computing. It has a very
@@ -118,4 +118,12 @@ Job Size and Overheads
 ----------------------
 
 The action of calling :title: 'client.submit(*args)' carries with it an overhead of 
-~1 ms per task. Consequently, for tasks that are already fast (like calling np.sum)
+~1 ms per task. Consequently, for tasks that are already fast (like calling 
+np.sum on a reasonably small frame) we either recommend submitting several
+frames in a single job or running the job in a serial fashion depending upon
+your needs.
+
+
+
+
+
