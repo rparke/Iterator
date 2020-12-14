@@ -64,13 +64,18 @@ We will run this serial job and time how long it takes to complete ::
         return return_list
     
     def run_in_serial():
+    
+        #Create two threads that will read and write keys from a shared queue object
         queue = Queue()
         key_generator_thread = Thread(target = key_generator(queue))
         frame_consumer_serial_thread = Thread(target = frame_consumer_serial, args = (queue,))
     
+        #Start timer and start threads running
         start_time = time.time()
         key_generator_thread.start()
         frame_consumer_serial_thread.start()
+        
+        #Wait for both threads to finish, stop timer and print time taken
         key_generator_thread.join()
         frame_consumer_serial_thread.join()
         finish_time = time.time()
@@ -92,12 +97,17 @@ We will slightly augment the run_in_serial function to run on dask ::
         
     def run_in_parallel_in_dask():
         queue = Queue()
+        
+        #Create two threads that will read and write keys from a shared queue object
         key_generator_thread = Thread(target = key_generator, args = (queue,))
         frame_consumer_serial_thread = Thread(target = frame_consumer_parallel, args = (queue,))
     
+        #Start timer and start threads running
         start_time = time.time()
         key_generator_thread.start()
         frame_consumer_serial_thread.start()
+        
+        #Wait for both threads to finish, stop timer and print time taken
         key_generator_thread.join()
         frame_consumer_serial_thread.join()
         finish_time = time.time()
