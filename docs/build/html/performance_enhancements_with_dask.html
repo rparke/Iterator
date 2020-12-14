@@ -1,57 +1,175 @@
 
-<!DOCTYPE html>
 
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boosting Performance with Dask &#8212; swmr_tools 0.1 documentation</title>
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Interfacing With Dask &mdash; swmr_tools 0.2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="swmr_tools" href="modules.html" />
     <link rel="prev" title="DataSource" href="datasource.html" /> 
-  </head><body>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="modules.html" title="swmr_tools"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="datasource.html" title="DataSource"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">swmr_tools 0.1 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Boosting Performance with Dask</a></li> 
-      </ul>
-    </div>  
+</head>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> swmr_tools
+          
+
+          
+          </a>
+
+          
             
-  <div class="section" id="boosting-performance-with-dask">
-<h1>Boosting Performance with Dask<a class="headerlink" href="#boosting-performance-with-dask" title="Permalink to this headline">¶</a></h1>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="keyfollower.html">KeyFollower</a></li>
+<li class="toctree-l1"><a class="reference internal" href="datasource.html">DataSource</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interfacing With Dask</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example-using-dask-to-speed-up-data-reduction">Example - Using Dask to Speed up Data Reduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sequential-example">Sequential Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#job-size-and-overheads">Job Size and Overheads</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">swmr_tools</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">swmr_tools</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Interfacing With Dask</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/performance_enhancements_with_dask.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="interfacing-with-dask">
+<h1>Interfacing With Dask<a class="headerlink" href="#interfacing-with-dask" title="Permalink to this headline">¶</a></h1>
 <p>Dask is an open source library in python for parallel computing. It has a very
 extensive feature set allowing projects built in standard scientific python
 libraries to scale for very large datasets. In swmr_tools we currently only
 use a small subset of dasks features to help parallelise operations on dataset
 frames.</p>
-<div class="section" id="using-dask-to-speed-up-data-reduction">
-<h2>Using Dask to Speed up Data Reduction<a class="headerlink" href="#using-dask-to-speed-up-data-reduction" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="example-using-dask-to-speed-up-data-reduction">
+<h2>Example - Using Dask to Speed up Data Reduction<a class="headerlink" href="#example-using-dask-to-speed-up-data-reduction" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="sequential-example">
 <h3>Sequential Example<a class="headerlink" href="#sequential-example" title="Permalink to this headline">¶</a></h3>
 <p>For this example we will create a reasonably large dataset containing random numbers</p>
@@ -98,13 +216,18 @@ frames.</p>
     <span class="k">return</span> <span class="n">return_list</span>
 
 <span class="k">def</span> <span class="nf">run_in_serial</span><span class="p">():</span>
+
+    <span class="c1">#Create two threads that will read and write keys from a shared queue object</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
     <span class="n">key_generator_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">key_generator</span><span class="p">(</span><span class="n">queue</span><span class="p">))</span>
     <span class="n">frame_consumer_serial_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">frame_consumer_serial</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">queue</span><span class="p">,))</span>
 
+    <span class="c1">#Start timer and start threads running</span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">key_generator_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">frame_consumer_serial_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="c1">#Wait for both threads to finish, stop timer and print time taken</span>
     <span class="n">key_generator_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
     <span class="n">frame_consumer_serial_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
     <span class="n">finish_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -126,12 +249,17 @@ frames.</p>
 
 <span class="k">def</span> <span class="nf">run_in_parallel_in_dask</span><span class="p">():</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+
+    <span class="c1">#Create two threads that will read and write keys from a shared queue object</span>
     <span class="n">key_generator_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">key_generator</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">queue</span><span class="p">,))</span>
     <span class="n">frame_consumer_serial_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">frame_consumer_parallel</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">queue</span><span class="p">,))</span>
 
+    <span class="c1">#Start timer and start threads running</span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">key_generator_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
     <span class="n">frame_consumer_serial_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="c1">#Wait for both threads to finish, stop timer and print time taken</span>
     <span class="n">key_generator_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
     <span class="n">frame_consumer_serial_thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
     <span class="n">finish_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -145,79 +273,68 @@ frames.</p>
 <div class="section" id="job-size-and-overheads">
 <h3>Job Size and Overheads<a class="headerlink" href="#job-size-and-overheads" title="Permalink to this headline">¶</a></h3>
 <p>The action of calling :title: ‘client.submit(<a href="#id1"><span class="problematic" id="id2">*</span></a>args)’ carries with it an overhead of
-~1 ms per task. Consequently, for tasks that are already fast (like calling np.sum)</p>
+~1 ms per task. Consequently, for tasks that are already fast (like calling
+np.sum on a reasonably small frame) we either recommend submitting several
+frames in a single job or running the job in a serial fashion depending upon
+your needs.</p>
 </div>
 </div>
 </div>
 
 
-            <div class="clearer"></div>
+           </div>
+           
           </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Boosting Performance with Dask</a><ul>
-<li><a class="reference internal" href="#using-dask-to-speed-up-data-reduction">Using Dask to Speed up Data Reduction</a><ul>
-<li><a class="reference internal" href="#sequential-example">Sequential Example</a></li>
-<li><a class="reference internal" href="#job-size-and-overheads">Job Size and Overheads</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="modules.html" class="btn btn-neutral float-right" title="swmr_tools" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="datasource.html" class="btn btn-neutral float-left" title="DataSource" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="datasource.html"
-                        title="previous chapter">DataSource</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="modules.html"
-                        title="next chapter">swmr_tools</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/performance_enhancements_with_dask.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>$('#searchbox').show(0);</script>
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Diamond Light Source Ltd
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="modules.html" title="swmr_tools"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="datasource.html" title="DataSource"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">swmr_tools 0.1 documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Boosting Performance with Dask</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2020, Diamond Light Source Ltd.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
-    </div>
-  </body>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
 </html>
