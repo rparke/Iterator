@@ -1,6 +1,6 @@
-#######################################################
-Interfacing with Dask for Performance Boosts
-#######################################################
+#####################
+Interfacing With Dask
+#####################
 
 
 Dask is an open source library in python for parallel computing. It has a very
@@ -9,9 +9,9 @@ libraries to scale for very large datasets. In swmr_tools we currently only
 use a small subset of dasks features to help parallelise operations on dataset
 frames.
 
-=====================================
-Using Dask to Speed up Data Reduction
-=====================================
+===============================================
+Example - Using Dask to Speed up Data Reduction
+===============================================
 
 ------------------
 Sequential Example
