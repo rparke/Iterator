@@ -71,6 +71,7 @@ class DataFollower():
                     current_dataset_slice.append(fg.Grabber(current_dataset_index))
             
             else:
+                pass
                 
             
             #Old method, works but a lot of code
