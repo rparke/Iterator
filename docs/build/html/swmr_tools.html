@@ -90,7 +90,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">swmr_tools</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">swmr_tools package</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#module-swmr_tools.DataSource">swmr_tools.DataSource module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#swmr-tools-datasource-module">swmr_tools.DataSource module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-swmr_tools.KeyFollower">swmr_tools.KeyFollower module</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#module-swmr_tools">Module contents</a></li>
 </ul>
@@ -169,50 +169,8 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-swmr_tools.DataSource">
-<span id="swmr-tools-datasource-module"></span><h2>swmr_tools.DataSource module<a class="headerlink" href="#module-swmr_tools.DataSource" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="swmr_tools.DataSource.DataFollower">
-<em class="property">class </em><code class="sig-prename descclassname">swmr_tools.DataSource.</code><code class="sig-name descname">DataFollower</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hdf5_file</span></em>, <em class="sig-param"><span class="n">keypaths</span></em>, <em class="sig-param"><span class="n">dataset_paths</span></em>, <em class="sig-param"><span class="n">timeout</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#swmr_tools.DataSource.DataFollower" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Iterator for returning dataset frames for any number of datasets. This
-class acts as a wrapper for the KeyFollower.Follower and 
-KeyFollower.FrameGrabber classes.</p>
-<dl>
-<dt>hdf5_file: h5py.File</dt><dd><p>Instance of h5py.File object. Choose the file containing data you wish
-to follow.</p>
-</dd>
-<dt>keypaths: list</dt><dd><p>A list of paths (as strings) to groups in hdf5_file containing unique
-key datasets. (Note: paths must be to the group containing the dataset</p>
-<blockquote>
-<div><p>and not full paths to the dataset itself)</p>
-</div></blockquote>
-</dd>
-<dt>dataset_paths: list</dt><dd><p>A list of paths (as strings) to datasets in hdf5_file that you wish
-to return frames from (Note: paths must be to the dataset and not</p>
-<blockquote>
-<div><p>to the group containing it)</p>
-</div></blockquote>
-</dd>
-<dt>timeout: int (optional)</dt><dd><p>The maximum time allowed for a dataset to update before the timeout
-termination condition is trigerred and iteration is halted. If a value
-is not set this will default to 10 seconds.</p>
-</dd>
-</dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;/home/documents/work/data/example.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">swmr</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">df</span> <span class="o">=</span> <span class="n">DataFollower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">path_to_key_group</span><span class="p">,</span> <span class="n">path_to_datasets</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="k">for</span> <span class="n">list_of_frames</span> <span class="ow">in</span> <span class="n">df</span><span class="p">:</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="nb">print</span><span class="p">(</span><span class="n">list_of_frames</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt id="swmr_tools.DataSource.DataFollower.reset">
-<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#swmr_tools.DataSource.DataFollower.reset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reset the iterator to start again from frame 0</p>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="swmr-tools-datasource-module">
+<h2>swmr_tools.DataSource module<a class="headerlink" href="#swmr-tools-datasource-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-swmr_tools.KeyFollower">
 <span id="swmr-tools-keyfollower-module"></span><h2>swmr_tools.KeyFollower module<a class="headerlink" href="#module-swmr_tools.KeyFollower" title="Permalink to this headline">¶</a></h2>

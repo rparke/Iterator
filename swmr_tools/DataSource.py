@@ -41,10 +41,11 @@ class DataFollower():
     >>>         print(list_of_frames)
     
     """
-    def __init__(self, hdf5_file, keypaths, dataset_paths, timeout = 1):
+    def __init__(self, hdf5_file, keypaths, dataset_paths, timeout = 1, as_dict = False):
         self.hdf5_file = hdf5_file
         self.dataset_paths = dataset_paths
         self.kf = Follower(hdf5_file, keypaths, timeout)
+        self.as_dict = as_dict
         
             
         
@@ -63,10 +64,13 @@ class DataFollower():
             
             current_dataset_index = next(self.kf)
             
-            current_dataset_slice = []
-            for path in self.dataset_paths:
-                fg = FrameGrabber(path, self.hdf5_file)
-                current_dataset_slice.append(fg.Grabber(current_dataset_index))
+            if not self.as_dict:
+                current_dataset_slice = []
+                for path in self.dataset_paths:
+                    fg = FrameGrabber(path, self.hdf5_file)
+                    current_dataset_slice.append(fg.Grabber(current_dataset_index))
+            
+            else:
                 
             
             #Old method, works but a lot of code
