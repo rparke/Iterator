@@ -86,7 +86,10 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="keyfollower.html">KeyFollower</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">DataSource</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DataSource</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#datafollower">DataFollower</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="performance_enhancements_with_dask.html">Interfacing With Dask</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">swmr_tools</a></li>
 </ul>
@@ -156,11 +159,79 @@
             
   <div class="section" id="datasource">
 <h1>DataSource<a class="headerlink" href="#datasource" title="Permalink to this headline">¶</a></h1>
-<p>The DataSource class provides an efficient wrapper for the
+<p>The DataSource submodule provides an efficient wrapper for the
 KeyFollower.Follower and KeyFollower.FrameGrabber classes. Instances of the
 DataSource.DataFollower class are iterators with similar functionality to
 instances of the KeyFollower.Follower class, however rather than indices they
 simply produce the frames themselves.</p>
+<div class="section" id="datafollower">
+<h2>DataFollower<a class="headerlink" href="#datafollower" title="Permalink to this headline">¶</a></h2>
+<p>The DataFollower class requires 3 arguments:
+* An instance of an h5py.File object containing the datasets of interest
+* A list of paths to <em>groups</em> containing datasets of keys
+* A list of paths to <em>datasets</em> containing the data you wish to process</p>
+<p>THe DataFollower also has an optional timeout argument, which defaults to 1
+second unless otherwise specified. This works in exactly the same way as the
+timeout for the KeyFollower.Follower class.</p>
+<p>First we will create a small dataset and corresponding unique key dataset to use
+in our example. The keys will all be non-zero so we should expect to recieve
+every frame of the dataset</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">swmr_tools.KeyFollower</span> <span class="kn">import</span> <span class="n">Follower</span><span class="p">,</span> <span class="n">FrameGrabber</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#Create a small dataset to extract frames from</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="n">low</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10000</span><span class="p">,</span> <span class="n">high</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span> <span class="n">size</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">keys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1">#Save data to an hdf5 File</span>
+<span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;example.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">libver</span> <span class="o">=</span> <span class="s2">&quot;latest&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;keys&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;keys_1&quot;</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">keys</span><span class="p">)</span>
+    <span class="n">f</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="s2">&quot;data_1&quot;</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Firstly we will iterate through the frames just using the classes found in the
+KeyFollower submodule</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s2">&quot;example.h5&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">kf</span> <span class="o">=</span> <span class="n">Follower</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;keys&quot;</span><span class="p">],</span> <span class="n">timeout</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">fg</span> <span class="o">=</span> <span class="n">FrameGrabber</span><span class="p">(</span><span class="s2">&quot;data/data_1&quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kf</span><span class="p">:</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">fg</span><span class="o">.</span><span class="n">Grabber</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Frame number: </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">Frame</span> <span class="n">number</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">[[[[</span><span class="o">-</span><span class="mi">4281</span>  <span class="mi">6557</span> <span class="o">-</span><span class="mi">1425</span>  <span class="o">-</span><span class="mi">627</span> <span class="o">-</span><span class="mi">6986</span> <span class="o">-</span><span class="mi">9047</span> <span class="o">-</span><span class="mi">1977</span>  <span class="mi">7788</span>  <span class="o">-</span><span class="mi">580</span>  <span class="mi">6283</span><span class="p">]</span>
+   <span class="p">[</span>  <span class="mi">500</span>  <span class="mi">4060</span> <span class="o">-</span><span class="mi">1153</span>   <span class="o">-</span><span class="mi">74</span> <span class="o">-</span><span class="mi">4364</span> <span class="o">-</span><span class="mi">7244</span>  <span class="mi">2729</span>  <span class="o">-</span><span class="mi">656</span>  <span class="mi">8432</span>  <span class="mi">9709</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">8809</span>  <span class="mi">1876</span>  <span class="mi">3045</span> <span class="o">-</span><span class="mi">3542</span>  <span class="mi">3356</span> <span class="o">-</span><span class="mi">3126</span>  <span class="o">-</span><span class="mi">870</span>  <span class="mi">5918</span> <span class="o">-</span><span class="mi">9631</span>  <span class="mi">3778</span><span class="p">]</span>
+   <span class="p">[</span><span class="o">-</span><span class="mi">5345</span> <span class="o">-</span><span class="mi">2533</span> <span class="o">-</span><span class="mi">1390</span>   <span class="mi">778</span>  <span class="mi">5343</span> <span class="o">-</span><span class="mi">6455</span>  <span class="mi">8323</span> <span class="o">-</span><span class="mi">9691</span> <span class="o">-</span><span class="mi">6391</span> <span class="o">-</span><span class="mi">8751</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">9946</span> <span class="o">-</span><span class="mi">9685</span>  <span class="mi">5647</span>    <span class="mi">58</span> <span class="o">-</span><span class="mi">6917</span> <span class="o">-</span><span class="mi">8293</span> <span class="o">-</span><span class="mi">2996</span> <span class="o">-</span><span class="mi">2750</span> <span class="o">-</span><span class="mi">6316</span> <span class="o">-</span><span class="mi">3482</span><span class="p">]]]]</span>
+
+<span class="n">Frame</span> <span class="n">number</span><span class="p">:</span> <span class="mi">1</span>
+<span class="p">[[[[</span><span class="o">-</span><span class="mi">1253</span>  <span class="mi">9761</span>  <span class="mi">6238</span> <span class="o">-</span><span class="mi">9821</span>  <span class="mi">1387</span>  <span class="mi">6874</span>  <span class="o">-</span><span class="mi">868</span>  <span class="mi">3822</span> <span class="o">-</span><span class="mi">1616</span> <span class="o">-</span><span class="mi">5921</span><span class="p">]</span>
+   <span class="p">[</span><span class="o">-</span><span class="mi">4726</span> <span class="o">-</span><span class="mi">8688</span> <span class="o">-</span><span class="mi">2628</span>  <span class="mi">2635</span> <span class="o">-</span><span class="mi">5100</span> <span class="o">-</span><span class="mi">9442</span> <span class="o">-</span><span class="mi">2628</span>  <span class="mi">5792</span> <span class="o">-</span><span class="mi">6729</span> <span class="o">-</span><span class="mi">1501</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">7259</span>  <span class="o">-</span><span class="mi">607</span>  <span class="mi">4274</span>  <span class="mi">7983</span>  <span class="mi">8798</span>  <span class="mi">2091</span>  <span class="mi">2060</span> <span class="o">-</span><span class="mi">9672</span>  <span class="mi">8567</span>  <span class="mi">6648</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">2767</span>  <span class="mi">2705</span>  <span class="mi">2517</span>  <span class="mi">7770</span> <span class="o">-</span><span class="mi">5285</span>  <span class="o">-</span><span class="mi">622</span> <span class="o">-</span><span class="mi">8778</span> <span class="o">-</span><span class="mi">6393</span>  <span class="mi">9816</span>  <span class="mi">7685</span><span class="p">]</span>
+   <span class="p">[</span><span class="o">-</span><span class="mi">1871</span>  <span class="mi">7310</span>   <span class="mi">428</span> <span class="o">-</span><span class="mi">1829</span>  <span class="mi">7096</span>  <span class="mi">8685</span> <span class="o">-</span><span class="mi">9822</span> <span class="o">-</span><span class="mi">6908</span>  <span class="mi">9500</span>  <span class="mi">5022</span><span class="p">]]]]</span>
+
+<span class="n">Frame</span> <span class="n">number</span><span class="p">:</span> <span class="mi">2</span>
+<span class="p">[[[[</span> <span class="mi">6683</span>  <span class="mi">8590</span>  <span class="o">-</span><span class="mi">806</span>  <span class="o">-</span><span class="mi">701</span>     <span class="mi">2</span> <span class="o">-</span><span class="mi">6832</span>  <span class="mi">7351</span> <span class="o">-</span><span class="mi">7335</span>  <span class="mi">6456</span> <span class="o">-</span><span class="mi">7738</span><span class="p">]</span>
+   <span class="p">[</span><span class="o">-</span><span class="mi">4767</span>  <span class="mi">5214</span> <span class="o">-</span><span class="mi">9092</span>  <span class="mi">9093</span> <span class="o">-</span><span class="mi">3183</span>  <span class="mi">4051</span> <span class="o">-</span><span class="mi">4525</span>  <span class="mi">9185</span> <span class="o">-</span><span class="mi">5692</span>  <span class="mi">2774</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">7472</span>  <span class="mi">3384</span>  <span class="mi">4274</span>  <span class="mi">7456</span> <span class="o">-</span><span class="mi">3624</span> <span class="o">-</span><span class="mi">9486</span> <span class="o">-</span><span class="mi">6718</span> <span class="o">-</span><span class="mi">5747</span>  <span class="mi">8983</span> <span class="o">-</span><span class="mi">1810</span><span class="p">]</span>
+   <span class="p">[</span><span class="o">-</span><span class="mi">9976</span>  <span class="mi">5840</span>  <span class="mi">9276</span> <span class="o">-</span><span class="mi">7768</span>  <span class="mi">3213</span>  <span class="mi">4447</span> <span class="o">-</span><span class="mi">3300</span>  <span class="mi">5171</span>  <span class="mi">1410</span> <span class="o">-</span><span class="mi">8409</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">2369</span>  <span class="mi">9319</span>  <span class="mi">5359</span> <span class="o">-</span><span class="mi">8501</span>     <span class="mi">9</span>  <span class="mi">2240</span>  <span class="mi">4141</span>  <span class="mi">7006</span>  <span class="mi">5657</span>  <span class="mi">3873</span><span class="p">]]]]</span>
+
+<span class="n">Frame</span> <span class="n">number</span><span class="p">:</span> <span class="mi">3</span>
+<span class="p">[[[[</span> <span class="mi">1869</span>  <span class="mi">9865</span>  <span class="mi">9101</span> <span class="o">-</span><span class="mi">4053</span> <span class="o">-</span><span class="mi">1210</span>  <span class="mi">6051</span> <span class="o">-</span><span class="mi">2587</span> <span class="o">-</span><span class="mi">4107</span>  <span class="mi">5175</span>  <span class="mi">4221</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">5282</span>  <span class="mi">8801</span>  <span class="mi">4959</span> <span class="o">-</span><span class="mi">5477</span>  <span class="mi">5349</span>  <span class="mi">5623</span>  <span class="mi">8100</span> <span class="o">-</span><span class="mi">8288</span>  <span class="mi">7174</span> <span class="o">-</span><span class="mi">6669</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">3860</span>  <span class="mi">6388</span> <span class="o">-</span><span class="mi">3374</span>  <span class="mi">8572</span>  <span class="mi">7730</span> <span class="o">-</span><span class="mi">1858</span>  <span class="mi">3225</span> <span class="o">-</span><span class="mi">6311</span>  <span class="mi">1994</span> <span class="o">-</span><span class="mi">9195</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">4291</span>  <span class="mi">4469</span> <span class="o">-</span><span class="mi">5639</span>  <span class="mi">1853</span> <span class="o">-</span><span class="mi">5516</span> <span class="o">-</span><span class="mi">4626</span>  <span class="mi">7894</span>  <span class="mi">2194</span>  <span class="o">-</span><span class="mi">585</span> <span class="o">-</span><span class="mi">7488</span><span class="p">]</span>
+   <span class="p">[</span> <span class="mi">1701</span> <span class="o">-</span><span class="mi">8787</span>  <span class="o">-</span><span class="mi">873</span>  <span class="mi">9719</span>  <span class="mi">5926</span>  <span class="mi">6615</span> <span class="o">-</span><span class="mi">6505</span>  <span class="mi">8459</span>  <span class="mi">5437</span>   <span class="mi">842</span><span class="p">]]]]</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 

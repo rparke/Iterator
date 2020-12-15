@@ -2,6 +2,9 @@
 KeyFollower
 ###########
 
+A Jupyter Notebook version of this tutorial can be found at: 
+https://github.com/rparke/Iterator/blob/master/tutorials/KeyFollower.ipynb
+
 The KeyFollower class is designed to facilitate live data processing of
 datasets contained within an hdf5 file. It achieves this through the use of
 two main classes:
